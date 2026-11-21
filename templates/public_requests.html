@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Donation Requests - Conecta Solidário</title>
+</head>
+
+<body>
+
+    <h1>Conecta Solidário</h1>
+
+    <h2>Available Donation Requests</h2>
+
+    <p>Help an NGO by offering a donation!</p>
+
+    <hr>
+
+    {% if requests %}
+
+        {% for request in requests %}
+
+            <h3>{{ request.donation_type }}</h3>
+
+            <p><strong>NGO:</strong> {{ request.ngo_name }}</p>
+
+            <p><strong>Description:</strong> {{ request.description }}</p>
+
+            <p><strong>Required Quantity:</strong> {{ request.quantity }}</p>
+
+            <p><strong>Priority:</strong> {{ request.priority }}</p>
+
+            <p><strong>Status:</strong> {{ request.status }}</p>
+
+            <button type="button">Offer Donation</button>
+
+            <hr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>There are no open donation requests at the moment.</p>
+
+    {% endif %}
+
+</body>
+</html>
