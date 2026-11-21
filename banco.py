@@ -1,20 +1,20 @@
 
 import sqlite3
 
-# Conectar ao banco de dados
-def conectar():
-    conexao = sqlite3.connect("doacoes.db")
-    conexao.row_factory = sqlite3.Row
-    conexao.execute("PRAGMA foreign_keys = ON")
-    return conexao
+# Connect to the database
+def connect():
+    connection = sqlite3.connect("doacoes.db")
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+    return connection
 
 
-# Criar as tabelas
-def criar_banco():
-    conexao = conectar()
+# Create the database tables
+def create_database():
+    connection = connect()
 
-    # Cadastro das ONGs
-    conexao.execute("""
+    # NGO registration data
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS ongs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
@@ -22,9 +22,9 @@ def criar_banco():
             contato TEXT
         )
     """)
-    
-    # Dados de acesso das ONGs
-    conexao.execute("""
+
+    # NGO login credentials
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS acessos_ong (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ong_id INTEGER NOT NULL UNIQUE,
@@ -35,17 +35,16 @@ def criar_banco():
         )
     """)
 
-
-    # Tipos de doação
-    conexao.execute("""
+    # Donation types
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS tipos_doacao (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL UNIQUE
         )
     """)
 
-    # Pedidos feitos pelas ONGs
-    conexao.execute("""
+    # Donation requests made by NGOs
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ong_id INTEGER NOT NULL,
@@ -60,8 +59,8 @@ def criar_banco():
         )
     """)
 
-    # Categorias iniciais
-    tipos = [
+    # Initial donation categories
+    donation_types = [
         ("Alimentos",),
         ("Roupas",),
         ("Higiene",),
@@ -69,13 +68,13 @@ def criar_banco():
         ("Medicamentos",)
     ]
 
-    conexao.executemany(
+    connection.executemany(
         "INSERT OR IGNORE INTO tipos_doacao (nome) VALUES (?)",
-        tipos
+        donation_types
     )
 
-    # Doações oferecidas pelos usuários
-    conexao.execute("""
+    # Donations offered by users
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS doacoes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pedido_id INTEGER NOT NULL,
@@ -88,11 +87,11 @@ def criar_banco():
         )
     """)
 
-    conexao.commit()
-    conexao.close()
+    connection.commit()
+    connection.close()
 
-    print("Banco criado com sucesso!")
+    print("Database created successfully!")
 
 
 if __name__ == "__main__":
-    criar_banco()
+    create_database()
