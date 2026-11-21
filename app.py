@@ -104,6 +104,39 @@ def painel():
     )
 
 
+# Cadastrar um pedido de doacao
+@app.route("/cadastrar_pedido", methods=["POST"])
+def cadastrar_pedido():
+
+    if "ong_id" not in session:
+        return redirect(url_for("login"))
+
+    tipo_id = request.form["tipo_id"]
+    descricao = request.form["descricao"]
+    quantidade = request.form["quantidade"]
+    prioridade = request.form["prioridade"]
+
+    conexao = conectar()
+
+    conexao.execute("""
+        INSERT INTO pedidos
+        (ong_id, tipo_id, descricao, quantidade, prioridade)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        session["ong_id"],
+        tipo_id,
+        descricao,
+        quantidade,
+        prioridade
+    ))
+
+    conexao.commit()
+    conexao.close()
+
+    flash("Pedido cadastrado com sucesso!")
+
+    return redirect(url_for("painel"))
+
 # Sair da conta
 @app.route("/logout")
 def logout():
