@@ -22,6 +22,19 @@ def criar_banco():
             contato TEXT
         )
     """)
+    
+    # Dados de acesso das ONGs
+    conexao.execute("""
+        CREATE TABLE IF NOT EXISTS acessos_ong (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ong_id INTEGER NOT NULL UNIQUE,
+            email TEXT NOT NULL UNIQUE,
+            senha TEXT NOT NULL,
+
+            FOREIGN KEY (ong_id) REFERENCES ongs(id)
+        )
+    """)
+
 
     # Tipos de doação
     conexao.execute("""
