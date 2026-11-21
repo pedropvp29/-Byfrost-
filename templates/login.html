@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Byfrost — Login & Sign Up</title>
+
+<style>
+:root {
+    --bg: #090e20;
+    --panel: #151c34;
+    --purple: #a995ff;
+    --mint: #9af4d1;
+    --white: #f8f7ff;
+    --muted: #aab5ce;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button, input, select {
+    font: inherit;
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: .28;
+    animation: float 14s ease-in-out infinite alternate;
+}
+
+.glow.one {
+    background: #7755df;
+    top: -300px;
+    left: -200px;
+}
+
+.glow.two {
+    background: #2aa68e;
+    bottom: -350px;
+    right: -180px;
+    animation-delay: -6s;
+}
+
+@keyframes float {
+    from { transform: translate(-30px, -20px); }
+    to { transform: translate(70px, 60px); }
+}
+
+.layout {
+    min-height: 100vh;
+    width: min(1260px, 94%);
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 65px;
+    align-items: center;
+    padding: 45px 0;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 27px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+}
+
+.brand-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(130deg, #a995ff, #9af4d1);
+    color: #11162a;
+    font-size: 26px;
+}
+
+.brand-dot {
+    color: var(--mint);
+}
+
+.presentation {
+    padding: 20px;
+}
+
+.tag {
+    display: inline-block;
+    border: 1px solid #525177;
+    background: #24233f;
+    color: var(--mint);
+    padding: 9px 15px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: 1px;
+    margin-top: 85px;
+}
+
+h1 {
+    max-width: 650px;
+    font-size: clamp(45px, 5vw, 78px);
+    line-height: 1.08;
+    letter-spacing: -4px;
+    margin: 25px 0;
+}
+
+.gradient {
+    background: linear-gradient(120deg, #b6a4ff, #9af4d1);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.presentation p {
+    max-width: 520px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 40px;
+}
+
+.feature {
+    padding: 12px 17px;
+    background: #1b2540;
+    border: 1px solid #35405e;
+    border-radius: 13px;
+    color: #dfe5f4;
+    font-size: 13px;
+}
+
+.auth-box {
+    padding: 38px;
+    border-radius: 27px;
+    background: rgba(24, 32, 57, .92);
+    border: 1px solid rgba(190, 180, 255, .2);
+    box-shadow: 0 30px 90px #0005;
+    backdrop-filter: blur(20px);
+    animation: show .65s ease both;
+}
+
+@keyframes show {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-box h2 {
+    font-size: 30px;
+    letter-spacing: -1.4px;
+    margin: 0 0 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #0e1529;
+    padding: 5px;
+    border-radius: 13px;
+    gap: 5px;
+    margin-bottom: 26px;
+}
+
+.tab {
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #a5b0ca;
+    font-weight: 750;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.tab.active {
+    color: #17152a;
+    background: var(--purple);
+}
+
+.form {
+    display: grid;
+    gap: 16px;
+    animation: formAppear .3s ease;
+}
+
+@keyframes formAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form[hidden] {
+    display: none;
+}
+
+.field {
+    display: grid;
+    gap: 7px;
+}
+
+.field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #d9dff0;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    background: #10182e;
+    border: 1px solid #3b4664;
+    border-radius: 12px;
+    color: white;
+    outline: none;
+    padding: 14px 15px;
+    transition: .25s;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px #a995ff22;
+}
+
+.field input::placeholder {
+    color: #74819f;
+}
+
+.field select option {
+    background: #151c34;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 75px;
+}
+
+.show-password {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--mint);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.remember input {
+    accent-color: var(--purple);
+    width: 16px;
+    height: 16px;
+}
+
+.forgot-password {
+    border: none;
+    background: transparent;
+    color: var(--mint);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 5px 0;
+    transition: color .25s;
+}
+
+.forgot-password:hover {
+    color: #c4ffea;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.submit {
+    background: linear-gradient(110deg, #a995ff, #b8a9ff);
+    color: #101326;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 34px #a995ff55;
+}
+
+.message {
+    padding: 13px;
+    border-radius: 11px;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.message.error {
+    background: #512a37;
+    color: #ffd1d9;
+}
+
+.message.success {
+    background: #214b40;
+    color: #b7ffe3;
+}
+
+.back {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.back:hover {
+    color: var(--mint);
+}
+
+.footer-note {
+    margin-top: 35px;
+    font-size: 12px;
+    color: #7d8aa8;
+}
+
+@media (max-width: 950px) {
+    .layout {
+        grid-template-columns: 1fr;
+        width: min(520px, 92%);
+        gap: 20px;
+    }
+
+    .presentation {
+        padding: 0;
+        text-align: center;
+    }
+
+    .presentation h1 {
+        font-size: 42px;
+        letter-spacing: -2px;
+    }
+
+    .tag {
+        margin-top: 25px;
+    }
+
+    .features {
+        justify-content: center;
+    }
+
+    .auth-box {
+        padding: 27px;
+    }
+
+    .footer-note {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .auth-box {
+        padding: 23px 19px;
+    }
+
+    .login-options {
+        align-items: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="background">
+    <div class="glow one"></div>
+    <div class="glow two"></div>
+</div>
+
+<main class="layout">
+
+<section class="presentation">
+
+    <a class="brand" href="{{ url_for('landing_page') }}">
+        <span class="brand-icon">✦</span>
+        Byfrost<span class="brand-dot">.</span>
+    </a>
+
+    <div class="tag">
+        ✦ CONNECTING PEOPLE AND PURPOSE
+    </div>
+
+    <h1>
+        Every great change begins with a
+        <span class="gradient">connection.</span>
+    </h1>
+
+    <p>
+        A place where good intentions turn into
+        real actions. Connect with donors, NGOs,
+        and businesses to make a difference.
+    </p>
+
+    <div class="features">
+        <div class="feature">♡ Make a difference</div>
+        <div class="feature">✦ Build connections</div>
+        <div class="feature">⌖ Change lives</div>
+    </div>
+
+    <div class="footer-note">
+        © Byfrost — Building bridges for good.
+    </div>
+
+</section>
+
+<section class="auth-box">
+
+    <h2 id="form-title">Welcome back.</h2>
+
+    <p class="subtitle" id="form-subtitle">
+        Sign in to your account and continue your journey.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="tabs">
+        <button
+            type="button"
+            class="tab active"
+            id="tab-login"
+            onclick="changeTab('login')">
+            Sign In
+        </button>
+
+        <button
+            type="button"
+            class="tab"
+            id="tab-register"
+            onclick="changeTab('register')">
+            Sign Up
+        </button>
+    </div>
+
+    <!-- LOGIN -->
+    <form
+        class="form"
+        id="login-form"
+        method="POST"
+        action="{{ url_for('login.login_page') }}"
+    >
+
+        <input type="hidden"
+               name="form_action"
+               value="login">
+
+        <div class="field">
+            <label for="identifier">Name or Email</label>
+
+            <input
+                type="text"
+                id="identifier"
+                name="identifier"
+                placeholder="Your name or email"
+                autocomplete="username"
+                required>
+        </div>
+
+        <div class="field">
+            <label for="login-password">Password</label>
+
+            <div class="password-wrapper">
+                <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required>
+
+                <button
+                    class="show-password"
+                    type="button"
+                    onclick="togglePassword('login-password', this)">
+                    Show
+                </button>
+            </div>
+        </div>
+
+        <div class="login-options">
+
+            <label class="remember">
+                <input type="checkbox" name="remember">
+                Remember me
+            </label>
+
+            <!-- VISUAL ONLY: NO FUNCTIONALITY YET -->
+            <button
+                type="button"
+                class="forgot-password">
+                Forgot password?
+            </button>
+
+        </div>
+
+        <button class="submit" type="submit">
+            Sign In to Byfrost →
+        </button>
+
+    </form>
+
+    <!-- REGISTER -->
+    <form
+        class="form"
+        id="register-form"
+        method="POST"
+        action="{{ url_for('login.login_page') }}"
+        hidden
+    >
+
+        <input type="hidden"
+               name="form_action"
+               value="register">
+
+        <div class="field">
+            <label for="register-type">Account Type</label>
+
+            <select name="type" id="register-type" required>
+                <option value="pessoa">Individual / User</option>
+                <option value="ong">Nonprofit / NGO</option>
+                <option value="empresa">Business</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="register-name">
+                Full Name or Organization Name
+            </label>
+
+            <input
+                type="text"
+                id="register-name"
+                name="name"
+                placeholder="Enter your name"
+                autocomplete="name"
+                minlength="2"
+                maxlength="120"
+                required>
+        </div>
+
+        <div class="field">
+            <label for="register-email">Email Address</label>
+
+            <input
+                type="email"
+                id="register-email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required>
+        </div>
+
+        <div class="field">
+            <label for="register-password">Password</label>
+
+            <div class="password-wrapper">
+                <input
+                    type="password"
+                    id="register-password"
+                    name="password"
+                    placeholder="At least 8 characters"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required>
+
+                <button
+                    class="show-password"
+                    type="button"
+                    onclick="togglePassword('register-password', this)">
+                    Show
+                </button>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="register-confirm">Confirm Password</label>
+
+            <input
+                type="password"
+                id="register-confirm"
+                name="confirm_password"
+                placeholder="Repeat your password"
+                autocomplete="new-password"
+                minlength="8"
+                required>
+        </div>
+
+        <button type="submit" class="submit">
+            Create My Account →
+        </button>
+
+    </form>
+
+    <a href="{{ url_for('landing_page') }}" class="back">
+        ← Back to Home
+    </a>
+
+</section>
+
+</main>
+
+<script>
+function changeTab(tab) {
+    const loginForm =
+        document.getElementById("login-form");
+
+    const registerForm =
+        document.getElementById("register-form");
+
+    const loginTab =
+        document.getElementById("tab-login");
+
+    const registerTab =
+        document.getElementById("tab-register");
+
+    const title =
+        document.getElementById("form-title");
+
+    const subtitle =
+        document.getElementById("form-subtitle");
+
+    const isLogin = tab === "login";
+
+    loginForm.hidden = !isLogin;
+    registerForm.hidden = isLogin;
+
+    loginTab.classList.toggle("active", isLogin);
+    registerTab.classList.toggle("active", !isLogin);
+
+    if (isLogin) {
+        title.textContent = "Welcome back.";
+        subtitle.textContent =
+            "Sign in to your account and continue your journey.";
+    } else {
+        title.textContent = "Your journey starts here.";
+        subtitle.textContent =
+            "Create an account and become part of Byfrost.";
+    }
+}
+
+function togglePassword(id, button) {
+    const input = document.getElementById(id);
+
+    if (input.type === "password") {
+        input.type = "text";
+        button.textContent = "Hide";
+    } else {
+        input.type = "password";
+        button.textContent = "Show";
+    }
+}
+
+document.getElementById("register-form")
+    .addEventListener("submit", function(event) {
+
+        const password =
+            document.getElementById("register-password").value;
+
+        const confirm =
+            document.getElementById("register-confirm").value;
+
+        if (password !== confirm) {
+            event.preventDefault();
+            alert("Passwords do not match.");
+        }
+    });
+</script>
+
+</body>
+</html>
