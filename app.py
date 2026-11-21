@@ -90,7 +90,6 @@ def login():
 
     return render_template("login.html")
 
-
 # Painel exclusivo da ONG
 @app.route("/painel")
 def painel():
@@ -98,9 +97,37 @@ def painel():
     if "ong_id" not in session:
         return redirect(url_for("login"))
 
+    conexao = conectar()
+
+    # Buscar as categorias de doacao
+    categorias = conexao.execute("""
+        SELECT id, nome
+        FROM tipos_doacao
+    """).fetchall()
+
+    # Buscar os pedidos da ONG logada
+    pedidos = conexao.execute("""
+        SELECT
+            pedidos.id,
+            tipos_doacao.nome AS tipo,
+            pedidos.descricao,
+            pedidos.quantidade,
+            pedidos.prioridade,
+            pedidos.status
+        FROM pedidos
+        JOIN tipos_doacao
+        ON pedidos.tipo_id = tipos_doacao.id
+        WHERE pedidos.ong_id = ?
+        ORDER BY pedidos.id DESC
+    """, (session["ong_id"],)).fetchall()
+
+    conexao.close()
+
     return render_template(
         "painel_ong.html",
-        ong_nome=session["ong_nome"]
+        ong_nome=session["ong_nome"],
+        categorias=categorias,
+        pedidos=pedidos
     )
 
 
