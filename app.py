@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.secret_key = "chave-secreta-trocar-depois"
 
 
-# Cadastro de uma ONG
+# NGO Registration
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
 
@@ -23,19 +23,19 @@ def cadastro():
         conexao = conectar()
 
         try:
-            # Cadastrar a ONG
+            # Register the NGO
             cursor = conexao.execute("""
                 INSERT INTO ongs (nome, endereco, contato)
                 VALUES (?, ?, ?)
             """, (nome, endereco, contato))
 
-            # Descobrir o ID da ONG cadastrada
+            # Get the ID of the registered NGO
             ong_id = cursor.lastrowid
 
-            # Proteger a senha
+            # Hash the password
             senha_hash = generate_password_hash(senha)
 
-            # Criar acesso da ONG
+            # Create the NGO login credentials
             conexao.execute("""
                 INSERT INTO acessos_ong
                 (ong_id, email, senha)
@@ -44,12 +44,12 @@ def cadastro():
 
             conexao.commit()
 
-            flash("ONG cadastrada com sucesso!")
+            flash("NGO successfully registered!")
             return redirect(url_for("login"))
 
         except sqlite3.IntegrityError:
             conexao.rollback()
-            flash("Este e-mail já está cadastrado.")
+            flash("This email is already registered.")
 
         finally:
             conexao.close()
@@ -57,7 +57,7 @@ def cadastro():
     return render_template("cadastro_ong.html")
 
 
-# Login da ONG
+# NGO Login
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -86,11 +86,12 @@ def login():
 
             return redirect(url_for("painel"))
 
-        flash("E-mail ou senha incorretos.")
+        flash("Incorrect email or password.")
 
     return render_template("login.html")
 
-# Painel exclusivo da ONG
+
+# NGO Dashboard
 @app.route("/painel")
 def painel():
 
@@ -99,13 +100,13 @@ def painel():
 
     conexao = conectar()
 
-    # Buscar as categorias de doacao
+    # Retrieve donation categories
     categorias = conexao.execute("""
         SELECT id, nome
         FROM tipos_doacao
     """).fetchall()
 
-    # Buscar os pedidos da ONG logada
+    # Retrieve requests from the logged-in NGO
     pedidos = conexao.execute("""
         SELECT
             pedidos.id,
@@ -131,7 +132,7 @@ def painel():
     )
 
 
-# Cadastrar um pedido de doacao
+# Create a Donation Request
 @app.route("/cadastrar_pedido", methods=["POST"])
 def cadastrar_pedido():
 
@@ -160,11 +161,12 @@ def cadastrar_pedido():
     conexao.commit()
     conexao.close()
 
-    flash("Pedido cadastrado com sucesso!")
+    flash("Donation request successfully created!")
 
     return redirect(url_for("painel"))
 
-# Sair da conta
+
+# Log Out
 @app.route("/logout")
 def logout():
 
