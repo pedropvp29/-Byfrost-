@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#171733">
+<title>Byfrost — Together, we make good happen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--ink:#252440;--muted:#77798f;--muted2:#9c9daf;--purple:#7355e5;--purple2:#927bf6;--mint:#56d5ad;--green:#15816e;--peach:#ffbf96;--gold:#e7a947;--bg:#f6f5fb;--panel:#fff;--line:#e8e6f0;--shadow:0 20px 65px #302e5910;--nav:#181a33;--radius:20px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 'DM Sans',system-ui,sans-serif;overflow-x:hidden}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}h1,h2,h3,p{margin:0}h1,h2,h3{font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-.045em}h1{font-size:clamp(30px,3.4vw,49px);line-height:1.14}h2{font-size:clamp(22px,2.2vw,31px);line-height:1.22}h3{font-size:17px;line-height:1.4}p{color:var(--muted);line-height:1.65}small{font-size:11px;color:var(--muted)}[hidden]{display:none!important}:focus-visible{outline:3px solid #4ac6a7;outline-offset:3px}
+.app-shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}.sidebar{background:var(--nav);color:#f9f9ff;display:flex;flex-direction:column;position:sticky;top:0;height:100dvh;z-index:60;padding:28px 15px 17px;border-right:1px solid #ffffff0f}.logo{display:flex;align-items:center;gap:12px;padding:0 12px 31px;font-size:25px;font-family:'Plus Jakarta Sans';font-weight:800;letter-spacing:-.065em}.logo .mark{height:42px;width:42px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#a994ff,#9ff1d0);color:#27234e;font-size:24px;box-shadow:0 12px 28px #5e49c444}.logo em{font-style:normal;color:#8df2d0}.nav-label{font-size:10px;letter-spacing:.15em;color:#77809b;text-transform:uppercase;font-weight:800;padding:14px 13px 8px}.nav{display:grid;gap:5px}.nav a{display:flex;align-items:center;gap:13px;border-radius:12px;padding:11px 13px;color:#aeb8ce;font-weight:700;font-size:13px;transition:.2s}.nav a:hover,.nav a.active{color:#fff;background:#30304f}.nav a.active{box-shadow:inset 3px 0 #77e6be}.nav a span:first-child{display:grid;place-items:center;width:23px;font-size:19px}.nav a small{color:#a9f5df;margin-left:auto}.side-blurb{margin-top:auto;margin-bottom:18px;background:linear-gradient(135deg,#433f77,#253e52);border:1px solid #7772aa5a;border-radius:16px;padding:19px}.side-blurb strong{font-size:13px}.side-blurb p{color:#c2cce0;font-size:11px;margin-top:6px}.profile-anchor{position:relative}.profile-toggle{display:flex;width:100%;align-items:center;gap:10px;border:1px solid #454a6b;background:#292b49;padding:10px;border-radius:15px;text-align:left;color:#fff}.mini-avatar{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;flex-shrink:0;background:linear-gradient(145deg,#c2a7ff,#9ce9d4);color:#2b244d;font-weight:800;font-size:17px;overflow:hidden}.mini-avatar img{width:100%;height:100%;object-fit:cover}.profile-toggle .identity{min-width:0;flex:1}.profile-toggle strong,.profile-toggle small{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.profile-toggle small{color:#a5aecd}.account-menu{position:absolute;bottom:72px;left:0;right:0;z-index:90;background:#292b49;border:1px solid #626382;border-radius:16px;padding:9px;box-shadow:0 22px 60px #0808167d}.account-menu a,.account-menu button{display:flex;align-items:center;gap:12px;border:0;color:#fff;width:100%;background:transparent;border-radius:10px;padding:11px;font-size:13px;text-align:left}.account-menu a:hover,.account-menu button:hover{background:#3e4163}.account-menu button{color:#ffc4c5}.account-menu form{margin:0}
+.main{min-width:0;max-width:1660px;width:100%;margin:0 auto;padding:0 38px 70px}.topbar{position:sticky;top:0;height:77px;display:flex;align-items:center;justify-content:space-between;gap:15px;z-index:35;background:#f6f5fbe8;backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}.crumb{font-size:12px;color:var(--muted);font-weight:700}.top-right{display:flex;align-items:center;gap:10px}.top-right .pill{border:1px solid #ded9eb;border-radius:99px;background:#fff;padding:8px 12px;color:#6d6a8c;font-size:11px;font-weight:700}.mobile-nav{display:none;border:1px solid var(--line);border-radius:11px;background:#fff;padding:8px 12px}.content{padding-top:34px}.section{margin:34px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.section-head p{font-size:13px;margin-top:5px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--green);text-transform:uppercase}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.card-pad{padding:23px}.soft{background:#f0eff9}.grid{display:grid;gap:18px}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}.flex{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}.wrap{flex-wrap:wrap}.stack{display:grid;gap:14px}.text-muted{color:var(--muted)}.text-sm{font-size:12px}.text-xs{font-size:11px}.sep{height:1px;background:var(--line);margin:14px 0}.badge{display:inline-flex;align-items:center;gap:5px;background:#f1edff;color:#644ac9;border:1px solid #e5dcff;padding:5px 10px;border-radius:99px;font-size:10px;font-weight:800;white-space:nowrap}.badge.green{background:#e5f8ef;border-color:#cdf0df;color:#137e65}.badge.gold{background:#fff3e0;border-color:#ffdeb1;color:#9f681a}.badge.gray{background:#f3f3f7;border-color:#e6e5ed;color:#77788d}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:41px;padding:10px 16px;border-radius:12px;background:var(--purple);color:white;border:1px solid transparent;font-size:12px;font-weight:800;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 11px 25px #674ad535}.btn.outline{background:#fff;color:#514a7a;border-color:#dbd8e8}.btn.mint{background:#2aab8d;color:white}.btn.ghost{background:#eeeafb;color:#6350bf}.btn.small{min-height:33px;padding:7px 11px}.btn.full{width:100%}.btn:disabled{opacity:.55;cursor:not-allowed}.link{color:var(--purple);font-weight:800;font-size:12px}.link:hover{text-decoration:underline}.field{display:grid;gap:5px}.field label{font-size:12px;color:#48465f;font-weight:700}.field input,.field select,.field textarea,.search{width:100%;background:#fff;border:1px solid #dedce9;color:var(--ink);border-radius:12px;padding:12px;outline:none}.field textarea{resize:vertical;min-height:95px}.field input:focus,.field select:focus,.field textarea:focus,.search:focus{border-color:#9c84ef;box-shadow:0 0 0 3px #ad9cfa30}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.form-grid>.wide{grid-column:1/-1}.check{display:flex;gap:9px;align-items:center;font-size:12px;color:#57536e}.check input{accent-color:var(--purple)}.empty{padding:35px;background:#fff;border:1px dashed #dad7ea;border-radius:19px;text-align:center;color:var(--muted)}.empty strong{display:block;margin-bottom:8px;color:var(--ink)}
+.hero{background:linear-gradient(115deg,#5144a9 3%,#7661d7 53%,#429f95 130%);color:white;border-radius:27px;min-height:290px;display:grid;grid-template-columns:1.25fr .75fr;align-items:center;overflow:hidden;position:relative;isolation:isolate;padding:36px 42px;border:1px solid #6f61c8;box-shadow:0 26px 55px #6755b52c}.hero:before{content:"";position:absolute;width:450px;height:450px;right:-110px;top:-190px;border:1px dashed #ffffff4c;border-radius:50%;box-shadow:0 0 0 75px #ffffff09,0 0 0 150px #ffffff06;animation:turn 40s linear infinite;z-index:-1}.hero:after{content:"✦";position:absolute;right:75px;bottom:-80px;font-size:230px;color:#ffffff10;z-index:-1}.hero .eyebrow{color:#bfffe0}.hero h1{max-width:640px;margin:13px 0}.hero p{color:#e6e3fb;max-width:555px;font-size:14px}.hero .btn{margin-top:22px;background:#fff;color:#5b47bb}.hero-art{position:relative;height:240px}.orbit-avatar{position:absolute;display:grid;place-items:center;background:#ffffff26;border:1px solid #ffffff77;box-shadow:0 18px 50px #17185352;backdrop-filter:blur(12px);border-radius:25px;font-size:48px;width:100px;height:100px;animation:float 5s ease-in-out infinite}.orbit-avatar.a{top:6px;left:16%;transform:rotate(-12deg)}.orbit-avatar.b{top:96px;right:12%;animation-delay:-2s}.orbit-avatar.c{bottom:0;left:4%;width:73px;height:73px;font-size:37px;animation-delay:-3s}.headline-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:19px}.headline-stats span{font-size:11px;background:#ffffff21;border:1px solid #ffffff45;border-radius:99px;padding:7px 12px}@keyframes turn{to{transform:rotate(360deg)}}@keyframes float{50%{translate:0 -14px}}
+.stat{padding:22px;min-height:125px}.stat strong{font:800 27px/1.2 'Plus Jakarta Sans';display:block;margin:10px 0 1px}.stat .icon{font-size:23px;display:inline-block}.stat small{font-size:12px}.feature-card{padding:22px;display:flex;gap:15px;align-items:center}.feature-card .blob{width:55px;height:55px;display:grid;place-items:center;background:#f2ebff;border-radius:17px;font-size:28px}.feature-card strong{display:block;margin-bottom:3px}.request-card{overflow:hidden;transition:transform .22s,border-color .22s;display:flex;flex-direction:column}.request-card:hover,.org-card:hover,.social-card:hover{transform:translateY(-3px);border-color:#c5b7f3}.request-cover{height:115px;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;position:relative;overflow:hidden}.request-cover:after{content:"";position:absolute;right:-35px;top:-70px;width:190px;height:190px;border:1px solid #ffffff69;border-radius:50%;box-shadow:0 0 0 35px #fff2,0 0 0 65px #fff1}.request-cover .category-emoji{font-size:49px;z-index:1;filter:drop-shadow(0 9px 10px #20203020)}.request-card .inner{padding:20px;display:flex;flex-direction:column;gap:11px;flex:1}.request-card h3{font-size:18px}.request-card p{font-size:12px;line-height:1.6;min-height:38px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.progress{height:8px;border-radius:8px;background:#efecf6;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,#8e77f5,#59d5af);border-radius:8px}.person-avatar{display:grid;place-items:center;flex-shrink:0;border-radius:16px;background:linear-gradient(145deg,#ede6ff,#d2f8ea);color:#6c55c1;width:49px;height:49px;font-size:21px;font-weight:800;overflow:hidden}.person-avatar img{width:100%;height:100%;object-fit:cover}.org-card,.social-card{transition:.2s;overflow:hidden}.org-banner{height:90px;position:relative;background:linear-gradient(110deg,#b3a0fd,#72dcc1)}.org-banner.company{background:linear-gradient(110deg,#facb9e,#b79af4)}.org-card .body{padding:18px;display:grid;gap:10px}.org-card .person-avatar{margin-top:-45px;z-index:1;border:4px solid white;width:68px;height:68px;border-radius:21px}.org-card h3{font-size:16px}.org-card p{font-size:12px;min-height:52px}.org-card .meta{display:flex;justify-content:space-between;gap:7px;align-items:center}.tabs{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid #e0dceb;background:white;color:#68627f;font-size:12px;font-weight:700;border-radius:11px;padding:9px 13px;cursor:pointer}.chip.active,.chip:hover{background:#ece7ff;color:#5c46bb;border-color:#cdbffe}.feed-grid{display:grid;grid-template-columns:minmax(0,1fr) 305px;gap:20px}.post{padding:24px;margin-bottom:16px}.post .head{display:flex;align-items:center;gap:11px}.post .head .name{font-weight:800}.post .body{font-size:14px;color:#3b3850;margin:19px 0;white-space:pre-wrap}.post-actions{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:13px}.post-actions button{color:#6d627f;background:none;border:0;font-weight:700;font-size:12px;padding:5px}.comments{background:#f7f6fb;border-radius:13px;margin-top:13px;padding:13px}.comment{font-size:12px;line-height:1.6;margin:5px 0;color:#545165}.comment strong{color:#494078}.comment-form{display:flex;gap:8px;margin-top:11px}.comment-form input{flex:1;min-width:0;border-radius:10px;border:1px solid #e1deec;padding:10px;background:white}.comment-form button{border:0;border-radius:10px;padding:7px 12px;background:#eee8ff;color:#604bc5;font-weight:800}.rank-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.rank-item:last-child{border-bottom:0}.rank-number{width:28px;text-align:center;color:#9f92c2;font-weight:800}.rank-item .person-avatar{width:39px;height:39px;border-radius:12px}.rank-item .detail{flex:1;min-width:0}.rank-item strong{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.rank-item small{display:block}.rank-score{font-weight:800;color:var(--green);font-size:12px}.reward-card{padding:22px;display:grid;gap:12px;position:relative;overflow:hidden}.reward-card:before{content:"";position:absolute;right:-48px;top:-55px;width:150px;height:150px;border:20px solid #a78bfa14;border-radius:50%}.reward-symbol{width:62px;height:62px;display:grid;place-items:center;font-size:33px;border-radius:18px;background:#f2edff;color:#7050e4;position:relative}.reward-card[data-color=mint] .reward-symbol{background:#e1f7ee;color:#138269}.reward-card[data-color=gold] .reward-symbol{background:#fff2da;color:#bb7b26}.reward-card[data-color=coral] .reward-symbol{background:#ffe9e8;color:#dc706a}.reward-card[data-color=sky] .reward-symbol{background:#e3f3ff;color:#438fbf}.reward-card h3{font-size:16px}.reward-card p{font-size:12px;min-height:40px}.profile-splash{height:185px;border-radius:22px;background:linear-gradient(105deg,#4d3b94,#8a72ee 58%,#67cbb1);position:relative;overflow:hidden}.profile-splash:after{content:"✳";position:absolute;font-size:260px;color:#ffffff15;right:6%;top:-100px}.profile-head{display:flex;align-items:flex-end;gap:21px;margin-top:-44px;position:relative;padding:0 25px}.profile-head .person-avatar{border:5px solid #fff;width:92px;height:92px;border-radius:24px;font-size:35px}.profile-head .titles{padding-bottom:5px}.detail{padding:17px;border:1px solid var(--line);background:#fff;border-radius:14px}.detail-label{font-size:11px;color:#87869c;font-weight:800;letter-spacing:.04em;margin-bottom:5px}.detail-line{display:flex;justify-content:space-between;align-items:center;gap:8px}.edit-pencil{color:#755adb;background:#f2edff;border:0;border-radius:9px;padding:6px 10px}.editor{display:grid;gap:8px;margin-top:12px}.editor input,.editor textarea{width:100%;border:1px solid #d5cbed;border-radius:10px;padding:10px}.editor .btn{margin-right:7px}.dark-card{background:linear-gradient(140deg,#292747,#494075);color:#fff;border-radius:20px;padding:23px}.dark-card p{color:#c8c3e6}.dark-card h3{margin-bottom:6px}.toast{position:fixed;bottom:22px;right:22px;z-index:130;background:#262443;color:#fff;padding:13px 20px;border-radius:14px;box-shadow:0 20px 50px #19162a66;max-width:360px}.toast[hidden]{display:none}.modal{border:0;background:white;border-radius:25px;padding:0;max-width:min(650px,calc(100vw - 28px));width:100%;max-height:90vh;overflow:auto;color:var(--ink);box-shadow:0 40px 110px #15113677}.modal::backdrop{background:#15142caa;backdrop-filter:blur(6px)}.modal-head{position:sticky;top:0;z-index:3;background:white;padding:23px 26px;display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line)}.modal-body{padding:26px}.x{border:0;background:#f0edf8;color:#705caa;border-radius:10px;font-size:20px;padding:4px 11px}.map{height:470px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#ebe6dd}.map-list{display:grid;gap:9px;align-content:start;max-height:470px;overflow:auto}.point-link{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;text-align:left;width:100%;color:var(--ink)}.point-link:hover{border-color:#9d85ea}.flash{margin:9px 0;padding:12px 16px;border-radius:13px;background:#e8f9ed;color:#18644c;font-weight:700}.flash.error{background:#fff0ed;color:#9a433b}.float-mission{padding:14px;border:1px solid #ece6f9;background:#faf8ff;border-radius:14px}.cover-art{height:150px;display:grid;place-items:center;font-size:68px;border-radius:20px;background:linear-gradient(135deg,#d8cfff,#c6f2e5)}.need-map{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.top-filters{display:flex;gap:10px;flex-wrap:wrap}.top-filters input{flex:1;min-width:200px}.top-filters select{width:185px}.public-wrap{max-width:1060px;margin:auto}.has-frame .person-avatar,.person-avatar.has-frame{box-shadow:0 0 0 3px #9b78fd,0 0 0 7px #e2d9ff}.profile-splash.accent-mint{background:linear-gradient(105deg,#116e67,#52cbaa,#a8eed2)}.profile-splash.accent-gold{background:linear-gradient(105deg,#a56627,#f3ca64,#ffe4a2)}.profile-splash.accent-coral{background:linear-gradient(105deg,#9b4e60,#f39b9a,#ffc4a2)}.profile-splash.accent-sky{background:linear-gradient(105deg,#2b5caa,#7bbfed,#bbf0ff)}.color-mint{color:#15967c}.color-violet{color:#6f52d2}.color-gold{color:#a87a26}.color-coral{color:#db6b65}.color-sky{color:#4e9dcc}.loading{opacity:.65}
+@media(max-width:1150px){.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(2,1fr)}.feed-grid{grid-template-columns:1fr}.main{padding-inline:24px}}
+@media(max-width:850px){.app-shell{display:block}.sidebar{position:fixed;transform:translateX(-105%);transition:transform .25s;box-shadow:0 20px 60px #090b1b55;width:265px}.sidebar.open{transform:translateX(0)}.mobile-nav{display:inline-block}.main{padding:0 18px 50px}.hero{grid-template-columns:1fr}.hero-art{display:none}.topbar{height:67px}.need-map{grid-template-columns:1fr}}
+@media(max-width:600px){.hero{padding:29px 23px;min-height:240px}.hero h1{font-size:32px}.grid3,.grid4,.grid2,.form-grid{grid-template-columns:1fr}.content{padding-top:20px}.section-head{align-items:start}.section-head .btn{white-space:normal}.topbar .pill{display:none}.modal-body{padding:17px}.profile-head{gap:12px;padding-inline:12px}.profile-head .person-avatar{width:75px;height:75px}.request-card .inner{padding:15px}.top-filters select{width:100%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+<style>
+/* BYFROST SOCIAL V4 — original visual system: editorial light surfaces + vibrant cause highlights */
+:root{--bg:#f7f8fc;--ink:#25233a;--panel:#fff;--line:#e8e9f0;--nav:#fff;--muted:#83849a;--purple:#7956de;--purple2:#a996ff;--mint:#64ddb4;--shadow:0 10px 35px #2923430d;--radius:20px}
+body{background:#f7f8fc;font-family:'DM Sans',sans-serif}.app-shell{grid-template-columns:235px minmax(0,1fr)}
+.sidebar{background:#fff;color:#282540;border-right:1px solid #ececf3;padding:26px 15px 16px;box-shadow:2px 0 16px #24234307}
+.logo{font-size:27px;color:#28243c}.logo em{color:#7b58d9}.logo .mark{background:linear-gradient(140deg,#a38df6,#6ddcb9);color:white;border-radius:16px}
+.nav-label{color:#a4a4b6}.nav a{color:#75758d;padding:12px 13px;border-radius:14px;font-weight:700}.nav a:hover{background:#f2effd;color:#6c54bf}.nav a.active{background:#eee9ff;color:#6950c9;box-shadow:none}.nav a.active span:first-child{color:#7355e5}
+.side-blurb{background:linear-gradient(130deg,#f1edff,#e8faf4);border:1px solid #e0d9fa;color:#6650b2}.side-blurb p{color:#666c7d}
+.profile-toggle{background:#f7f6fd;border-color:#e7e4f3;color:#27253d}.profile-toggle small{color:#9191a6}.account-menu{background:#fff;color:#25243c;border-color:#e1dce9;box-shadow:0 19px 50px #15122520}.account-menu a,.account-menu button{color:#303046}.account-menu button{color:#b94f68}.account-menu a:hover,.account-menu button:hover{background:#f1edfb}
+.main{max-width:1630px;padding:0 35px 60px}.topbar{background:#f7f8fcf2;border-color:#e6e7ed}.top-right .pill{background:#fff;color:#77718d}.crumb{color:#86869c}
+.card{box-shadow:0 8px 28px #261c5c0a;border-color:#eae9f2}.btn{background:#7956de;border-radius:12px;min-height:39px}.btn.outline{border:1px solid #e2def0;color:#6656a2;background:white}.btn:hover{box-shadow:0 12px 30px #7355e533}
+.social-layout{display:grid;grid-template-columns:minmax(0,690px) minmax(255px,290px);gap:37px;justify-content:center;align-items:start;padding-top:13px}
+.social-stream{min-width:0}.social-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:7px 0 24px}.social-heading h1{font-size:clamp(27px,3vw,38px);line-height:1.2;margin:7px 0}.social-heading p{font-size:13px}
+.story-strip{display:flex;gap:18px;padding:15px 19px;overflow-x:auto;background:white;border:1px solid #e9e7ef;border-radius:21px;scrollbar-width:thin;margin-bottom:19px;box-shadow:var(--shadow)}.story-bubble{display:flex;flex-direction:column;gap:2px;align-items:center;flex:0 0 73px;text-align:center}.story-bubble small{font-size:11px;font-weight:800;color:#4d4968;overflow:hidden;text-overflow:ellipsis;max-width:90px;white-space:nowrap}.story-role{font-size:9px;color:#a19db4}.story-ring{border-radius:50%;padding:3px;background:linear-gradient(140deg,#875ee6,#d29cf1 55%,#6ad7be);width:65px;height:65px;display:grid;place-items:center}.story-avatar{display:grid;place-items:center;background:#f4f0ff;border:3px solid white;border-radius:50%;width:59px;height:59px;font-size:23px;font-weight:900;color:#7454bb}.story-bubble:hover .story-ring{transform:translateY(-3px)}
+.social-compose{background:white;border:1px solid #e9e7ef;border-radius:21px;padding:19px;margin-bottom:18px;box-shadow:var(--shadow)}.compose-top{display:flex;align-items:center;gap:13px;margin-bottom:12px}.compose-top strong{font-size:14px}.compose-top small{display:block}.mini-circle{flex-shrink:0;width:43px;height:43px;border-radius:50%;background:linear-gradient(140deg,#ad9cf8,#b6efd9);display:grid;place-items:center;color:#513a8d;font-weight:900}.social-compose textarea{min-height:75px;max-height:230px;resize:vertical;border:0;outline:0;background:#f8f8fc;padding:14px 16px;width:100%;border-radius:14px;color:#282540;font:inherit}.compose-extra{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}.compose-extra input,.compose-extra select{min-width:0;flex:1;background:white;border:1px solid #e4e1ed;padding:9px 12px;border-radius:11px;font-size:12px;max-width:100%}.compose-footer{display:flex;align-items:center;gap:12px;margin-top:13px}.photo-upload{display:flex;align-items:center;gap:6px;border:1px solid #ede7f8;border-radius:11px;padding:9px 11px;cursor:pointer;color:#7b61c9;font-size:12px;font-weight:800}.compose-photo-name{color:#89869d;font-size:11px;max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.compose-footer .btn{margin-left:auto}.muted-compose{display:flex;align-items:center;gap:12px}
+.feed-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:21px 0 15px;position:relative}.feed-toggle{display:inline-flex;gap:5px;background:#eeedf6;padding:5px;border-radius:12px}.feed-toggle a{padding:8px 14px;font-weight:800;font-size:12px;border-radius:9px;color:#7e7b90}.feed-toggle a.selected{background:white;color:#7352d4;box-shadow:0 5px 15px #16102910}.interest-details{position:relative;color:#6b6288;font-size:12px;font-weight:800}.interest-details summary{cursor:pointer;list-style:none;padding:10px;border:1px solid #ece8f6;border-radius:11px;background:white}.interest-details summary::-webkit-details-marker{display:none}.interest-popover{position:absolute;right:0;top:43px;z-index:19;width:min(350px,82vw);background:white;border:1px solid #e4dfed;box-shadow:0 20px 55px #211a3d28;border-radius:16px;padding:19px;display:flex;gap:10px;flex-wrap:wrap}.interest-popover>strong,.interest-popover>p,.interest-chips{width:100%}.interest-popover p{font-size:12px}.personalize-switch{font-size:12px;color:#51496b;display:flex;gap:8px;align-items:center}.personalize-switch input{accent-color:#7457d8}.interest-chips{display:flex;gap:6px;flex-wrap:wrap}.interest-chips label{border:1px solid #e6e2f1;background:#faf9ff;border-radius:50px;padding:6px 9px;font-size:11px;color:#655a8a;cursor:pointer}.interest-chips input{accent-color:#7352d4}
+.social-post{background:white;border:1px solid #e9e8f1;border-radius:22px;overflow:hidden;margin-bottom:23px;box-shadow:0 9px 33px #3024510b;scroll-margin-top:100px}.social-post-head{display:flex;gap:11px;align-items:center;padding:15px 18px}.creator-avatar,.suggest-avatar{width:42px;height:42px;flex-shrink:0;border-radius:50%;background:linear-gradient(140deg,#beaffe,#a6ebd7);color:#463b7f;display:grid;place-items:center;font-weight:900;font-size:18px}.creator-meta{min-width:0;flex:1}.creator-name{font-size:13px;font-weight:850;color:#312f46}.creator-sub{font-size:11px;color:#9994aa}.creator-chip{font-size:10px;background:#eff2fa;color:#66617f;border-radius:99px;padding:6px 8px;font-weight:800}.creator-chip.ngo{color:#257a62;background:#e5f8ef}.creator-chip.business{color:#7755ad;background:#f2ebff}.post-menu-btn{border:0;background:none;font-size:23px;font-weight:900;color:#8883a1;width:30px;height:30px;line-height:1}
+.post-hero-image{width:100%;max-height:640px;background:#eee;display:grid;place-items:center}.post-hero-image img{width:100%;max-height:640px;object-fit:cover;display:block}.post-illustration{height:320px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;isolation:isolate;background:linear-gradient(145deg,#cdb9ff,#9680e6 53%,#a9f0dc);color:white}.post-illustration.illustration-1{background:linear-gradient(125deg,#ffbfc1,#e6a7ce,#c8a1e8)}.post-illustration.illustration-2{background:linear-gradient(125deg,#acdacf,#75c5a8,#7e83d6)}.post-illustration.illustration-3{background:linear-gradient(125deg,#f7b68c,#eaa2aa,#a486e0)}.post-illustration.illustration-4{background:linear-gradient(125deg,#b8c7ff,#98b5e2,#82d7c5)}.illustration-ring{position:absolute;z-index:-1;border:1px solid #ffffff65;border-radius:50%}.illustration-ring.a{width:370px;height:370px;transform:translate(-160px,-75px)}.illustration-ring.b{width:320px;height:320px;transform:translate(180px,85px)}.illustration-mark{font-size:75px;line-height:1;text-shadow:0 15px 35px #5b3d6930}.post-illustration strong{font-size:32px;font-weight:900;letter-spacing:-.04em}.post-illustration small{color:#fff;font-size:10px;font-weight:850;letter-spacing:.18em}
+.social-post-body{padding:13px 18px 18px}.post-action-line{display:flex;align-items:center;gap:9px}.post-action-line form{margin:0}.icon-action{background:none;border:0;font-size:28px;color:#4c4867;line-height:1;padding:5px 6px}.icon-action:hover{color:#7956de;transform:translateY(-2px)}.icon-action.liked{color:#df5e84}.icon-action.saved{color:#7657ce}.spacer{flex:1}.post-engagement{display:flex;gap:14px;font-size:12px;margin:9px 0;color:#8a839b}.post-engagement strong{color:#403954}.post-copy{white-space:pre-line;color:#454257;font-size:13px;line-height:1.75}.post-copy strong{color:#28243b}.post-topics{display:flex;flex-wrap:wrap;gap:9px;margin:11px 0}.post-topics span{font-size:12px;color:#7354c5;font-weight:800}.why-post{font-size:10px;color:#9f9aaa;margin:10px 0}.why-post span{color:#b0acb8}.post-project-link{display:inline-block;font-size:12px;font-weight:800;color:#7250ce;margin:8px 0}.post-donate-card{background:linear-gradient(110deg,#f5f0ff,#eafaf4);border:1px solid #e9ddfb;padding:15px;display:flex;align-items:center;gap:12px;justify-content:space-between;border-radius:16px;margin:15px 0}.post-donate-card>div{min-width:0}.post-donate-card strong,.post-donate-card small,.post-donate-card span{display:block}.post-donate-card small{font-size:10px;font-weight:850;color:#8365c5}.post-donate-card strong{font-size:14px;margin:3px 0}.post-donate-card span{font-size:11px;color:#858398}.post-comment{font-size:12px;margin:9px 0;color:#5b566d}.post-comment strong{color:#342b53}.social-comment-form{display:flex;align-items:center;gap:8px;padding-top:12px;margin-top:12px;border-top:1px solid #f0eef4}.social-comment-form input{border:0;background:none;outline:none;flex:1;min-width:0;padding:8px 0;font-size:12px}.social-comment-form button{border:0;background:none;color:#7e5adc;font-weight:850}.social-empty{background:#fff;border:1px solid #eee9f5;border-radius:20px;padding:40px;text-align:center}.social-empty>span{font-size:45px}
+.social-right-rail{position:sticky;top:95px;display:grid;gap:22px}.rail-profile{display:flex;gap:11px;align-items:center;padding:4px 3px 11px}.rail-avatar{width:47px;height:47px;border-radius:50%;background:linear-gradient(135deg,#b5a7f7,#95e8c7);color:#55438d;display:grid;place-items:center;font-size:20px;font-weight:900}.rail-profile>div{flex:1;min-width:0}.rail-profile strong,.rail-profile small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rail-profile a,.rail-heading a,.follow-inline{font-size:11px;color:#815dd8;font-weight:850}.rail-heading{display:flex;justify-content:space-between;align-items:center}.rail-heading strong{font-size:12px;color:#7b758c}.rail-suggestions{display:grid;gap:15px}.rail-suggestion{display:flex;align-items:center;gap:8px}.rail-suggestion .suggest-avatar{width:38px;height:38px;font-size:16px}.rail-suggestion>div{flex:1;min-width:0}.rail-suggestion>div a,.rail-suggestion>div small{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.rail-suggestion>div a{font-weight:850;font-size:12px}.rail-feature{background:linear-gradient(130deg,#242442,#4b3d7c 68%,#3f786b);color:white;border-radius:22px;padding:25px;box-shadow:0 19px 35px #2822461f}.rail-feature>span{font-weight:900;color:#a0f2d1;font-size:10px;letter-spacing:.1em}.rail-feature h3{font-size:19px;margin:10px 0}.rail-feature p{color:#c9d2e0;font-size:12px;margin-bottom:17px}.rail-feature .btn{background:#a5f0d2;color:#1b4053}.rail-rank{display:flex;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #e9e8ef}.rank-medal{width:25px;height:25px;border-radius:9px;background:#ebe3ff;color:#7656bc;display:grid;place-items:center;font-weight:900}.rail-rank strong{flex:1;font-size:12px}.rail-rank small{font-size:11px}.rail-footnote{line-height:1.55}
+.chat-layout{display:grid;grid-template-columns:285px minmax(0,1fr);height:min(75vh,740px);min-height:515px;background:#fff;border-radius:22px;border:1px solid #e8e6f0;overflow:hidden;box-shadow:var(--shadow)}.chat-roster{border-right:1px solid #eae8ef;overflow-y:auto}.chat-roster h2{padding:24px 18px 10px}.chat-contact{display:flex;gap:12px;align-items:center;padding:13px 15px;border-bottom:1px solid #f0eef3}.chat-contact.active,.chat-contact:hover{background:#f2efff}.chat-contact .creator-avatar{width:40px;height:40px}.chat-contact strong,.chat-contact small{display:block}.chat-contact strong{font-size:12px}.chat-contact small{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-conversation{display:flex;flex-direction:column;min-width:0;background:#f8f8fb}.chat-head{padding:16px 20px;background:white;border-bottom:1px solid #e6e5ed;display:flex;align-items:center;gap:11px}.chat-head strong{font-size:14px}.chat-head small{display:block}.chat-bubbles{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:13px;background-image:radial-gradient(#b4add523 .65px,transparent .65px);background-size:18px 18px}.chat-row{display:flex;flex-direction:column;align-items:flex-start;max-width:78%}.chat-row.mine{align-self:flex-end;align-items:flex-end}.chat-bubble{background:#fff;border:1px solid #eeebf4;border-radius:16px 16px 16px 4px;padding:11px 15px;color:#403d50;white-space:pre-wrap;font-size:13px;box-shadow:0 3px 10px #271c3b0a}.chat-row.mine .chat-bubble{background:#e4dafa;border-color:#dcd0ff;border-radius:16px 16px 4px 16px}.chat-row small{padding:4px 4px}.chat-compose{display:flex;gap:10px;padding:16px 18px;background:#fff;border-top:1px solid #e8e6ef}.chat-compose textarea{flex:1;resize:none;min-height:45px;max-height:95px;border:1px solid #e5e2ed;border-radius:13px;padding:11px;min-width:0}
+.mobile-dock{display:none}
+.profile-story-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}.profile-story{aspect-ratio:1;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(140deg,#aa9bf0,#c6a4e6,#9bdfd5);display:grid;place-items:center;color:white}.profile-story:nth-child(4n+2){background:linear-gradient(130deg,#9fd3bf,#70cbbf,#8c86e4)}.profile-story:nth-child(4n+3){background:linear-gradient(130deg,#e9b2aa,#e5a3c9,#ab88ec)}.profile-story img{position:absolute;width:100%;height:100%;object-fit:cover}.profile-story-symbol{font-size:62px;color:white;text-shadow:0 10px 20px #6a4c7845}.profile-story-caption{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#261e56c9,transparent);padding:32px 13px 10px;color:white;font-size:11px;font-weight:700;line-height:1.35}.profile-story-cta{position:absolute;top:9px;right:9px;background:#fffef0e8;color:#634db8;border-radius:99px;padding:4px 7px;font-size:10px;font-weight:800}
+@media(max-width:1280px){.social-layout{grid-template-columns:minmax(0,710px);max-width:780px;margin:auto}.social-right-rail{display:none}.main{padding-inline:24px}}
+@media(max-width:850px){.mobile-dock{display:flex;justify-content:space-around;gap:8px;position:fixed;bottom:0;left:0;right:0;background:#fffffff0;border-top:1px solid #e7e5ed;backdrop-filter:blur(15px);padding:9px 8px max(9px,env(safe-area-inset-bottom));z-index:70}.mobile-dock a{display:grid;place-items:center;gap:2px;color:#88829a;font-size:10px;font-weight:800}.mobile-dock a span{font-size:22px;line-height:1}.mobile-dock a.active{color:#7355dc}.main{padding-bottom:95px}}
+@media(max-width:620px){.main{padding-inline:12px}.social-layout{padding-top:0}.story-strip{border-radius:15px;padding:12px;gap:12px}.social-heading{align-items:flex-start}.social-heading h1{font-size:27px}.social-heading .btn{font-size:10px;padding:8px}.social-post{border-radius:15px}.post-illustration{height:250px}.post-donate-card{align-items:flex-start;flex-direction:column}.chat-layout{grid-template-columns:110px minmax(0,1fr);min-height:500px}.chat-contact{padding:9px 4px;display:grid;justify-items:center;text-align:center}.chat-contact small{display:none}.chat-contact strong{max-width:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-roster h2{font-size:14px;padding:14px 8px}.chat-bubbles{padding:12px}.chat-compose{padding:8px}.chat-compose .btn{padding:8px}.post-topics{gap:5px}}
+@media(prefers-reduced-motion:reduce){.story-ring,.icon-action{transition:none!important}}
+</style>
+
+<style>
+
+/* BYFROST SOCIAL — layout refinements (2026-11): no DB changes. */
+:root{--bf-fast:cubic-bezier(.22,1,.36,1)}
+html{scroll-padding-top:95px}
+body{overflow-x:clip}
+.card,.social-post,.profile-story,.org-card{min-width:0}
+.card h1,.card h2,.card h3,.titles h1,.titles h2{overflow-wrap:anywhere}
+.public-wrap{max-width:1130px;margin:0 auto;padding-bottom:30px}
+.bf-public-profile>.profile-splash{
+ height:clamp(155px,18vw,210px);border-radius:24px;
+ background:radial-gradient(ellipse at 76% 18%,#a99bff55,transparent 40%),
+  linear-gradient(110deg,#5843a6 0%,#886def 55%,#5bc8ac 100%);
+ box-shadow:0 17px 48px #6350ae22;
+}
+.bf-public-profile>.profile-splash:after{right:8%;top:-105px;opacity:.8;pointer-events:none}
+/* Fix: the text originally followed the raised avatar ABOVE the banner bottom. */
+.profile-head{
+ display:grid;grid-template-columns:96px minmax(0,1fr);align-items:start;
+ gap:18px;margin-top:-46px;padding:0 clamp(15px,2.5vw,29px);min-height:137px;
+}
+.profile-head>.person-avatar,
+.profile-head>.person-avatar.has-frame{width:96px;height:96px;border:5px solid #fff;
+ border-radius:25px;box-shadow:0 11px 30px #31226422;position:relative;z-index:2}
+.profile-head>.titles{padding:59px 0 13px;min-width:0;align-self:start}
+.profile-head>.titles .eyebrow{display:block;margin:0 0 4px;font-size:10px;letter-spacing:.14em}
+.profile-head>.titles h1{font-size:clamp(25px,3.2vw,36px);line-height:1.17;margin:0 0 5px;max-width:100%}
+.profile-head>.titles h2{font-size:clamp(23px,2.8vw,31px);line-height:1.18;margin:0 0 6px}
+.profile-head>.titles p{font-size:12px;line-height:1.5;color:#88859b;margin:0}
+.bf-public-profile>.section{margin-top:25px;margin-bottom:25px}
+.bf-public-profile>.section.grid{min-width:0;gap:17px}
+.bf-public-profile>.section.grid.grid2{align-items:start}
+.bf-public-profile>.section.grid.grid2>div{min-width:0}
+.bf-public-profile>.section.grid.grid2>.card{height:auto;min-width:0}
+.bf-public-profile .card.card-pad{padding:clamp(16px,2vw,24px)}
+.bf-public-profile .section-head{align-items:center;flex-wrap:wrap}
+.bf-public-profile h2{font-size:clamp(19px,2.4vw,26px);line-height:1.27}
+.bf-public-profile .card p,.bf-public-profile .card small{overflow-wrap:anywhere}
+.bf-public-profile .card .stack>.flex{min-width:0;align-items:flex-start}
+.bf-public-profile .card .stack>.flex>div{min-width:0;overflow-wrap:anywhere}
+/* Projects and stories must not stretch the right column or crop its content. */
+.bf-public-profile .profile-story-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:14px;align-items:stretch;margin-top:15px}
+.bf-public-profile .profile-story{aspect-ratio:auto;min-width:0;min-height:0;
+ display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+ overflow:hidden;border:1px solid #e7e3ef;border-radius:17px;background:#fff;
+ color:#29253f;box-shadow:0 8px 23px #3728520c;
+ transition:transform .3s var(--bf-fast),box-shadow .3s var(--bf-fast),border-color .3s}
+.bf-public-profile .profile-story:hover{transform:translateY(-4px);border-color:#c9bafc;box-shadow:0 16px 34px #5b44a51d}
+.bf-public-profile .profile-story img{position:static;display:block;width:100%;height:auto;
+ aspect-ratio:1.5;object-fit:cover;flex:0 0 auto;background:#222944}
+.bf-public-profile .profile-story-symbol{display:grid;place-items:center;min-height:124px;
+ font-size:46px;background:linear-gradient(135deg,#b4a4fc,#73d6c4)}
+.bf-public-profile .profile-story-caption{position:static;display:-webkit-box;
+ -webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;
+ min-height:62px;max-height:72px;margin:0;overflow:hidden;white-space:normal;
+ background:#fff;color:#3c3853;padding:12px 13px;font-size:11px;font-weight:700;
+ line-height:1.5;text-shadow:none;overflow-wrap:anywhere}
+.bf-public-profile .profile-story-cta{top:9px;right:9px;left:auto;
+ max-width:calc(100% - 18px);font-size:9px;line-height:1.2;padding:6px 9px;
+ white-space:normal;text-align:center;box-shadow:0 3px 11px #17172822}
+/* A comfortable reading width for campaign cards and reward descriptions. */
+.bf-public-profile .stack>.card p{line-height:1.6;overflow-wrap:anywhere}
+.bf-public-profile .stack>.card h3{line-height:1.4;overflow-wrap:anywhere}
+/* The feed keeps a readable column and a stable image area. */
+.social-post{transform:translateZ(0);transition:box-shadow .25s var(--bf-fast),border-color .25s}
+.social-post:hover{border-color:#dcd5f4;box-shadow:0 13px 37px #30245115}
+.social-post-body,.social-post-head{min-width:0}
+.social-post-body p,.social-post-body .post-caption{overflow-wrap:anywhere}
+.social-post-head .creator-meta{min-width:0}
+.social-post-head .creator-name{overflow-wrap:anywhere}
+.post-hero-image img{width:100%;height:auto;max-height:625px;object-fit:cover}
+.story-bubble,.profile-story,.org-card,.btn,.nav a{will-change:auto}
+/* Layout adapts gradually instead of squeezing side-by-side columns to 150px. */
+@media(max-width:1250px){
+ .bf-public-profile>.section.grid.grid2{grid-template-columns:1fr}
+ .bf-public-profile .profile-story-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .public-wrap{max-width:100%}
+ .bf-public-profile>.section.grid.grid3{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+ .bf-public-profile>.section.grid.grid3>.card{min-width:0;padding:13px}
+ .bf-public-profile>.section.grid.grid3>.card h2{font-size:20px}
+ .bf-public-profile>.section.grid.grid3>.card h3{font-size:13px}
+ .bf-public-profile>.section.grid.grid3>.card small{font-size:10px;line-height:1.4;display:block}
+ .bf-public-profile .profile-story-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .profile-head{grid-template-columns:82px minmax(0,1fr);gap:12px;margin-top:-40px;padding-inline:13px;min-height:134px}
+ .profile-head>.person-avatar,.profile-head>.person-avatar.has-frame{width:82px;height:82px;border-radius:22px}
+ .profile-head>.titles{padding-top:50px}
+ .profile-head>.titles h1{font-size:clamp(23px,5vw,32px)}
+}
+@media(max-width:460px){
+ .bf-public-profile>.profile-splash{height:145px;border-radius:17px}
+ .bf-public-profile>.section.grid.grid3{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .bf-public-profile>.section.grid.grid3>.card:last-child{grid-column:1/-1}
+ .bf-public-profile .profile-story-grid{gap:9px}
+ .bf-public-profile .profile-story img{aspect-ratio:1.35}
+ .bf-public-profile .profile-story-caption{font-size:10px;padding:10px;min-height:58px}
+ .bf-public-profile .profile-story-cta{font-size:8px;right:5px;top:5px;padding:5px 7px}
+ .profile-head{grid-template-columns:70px minmax(0,1fr);gap:10px;min-height:131px;margin-top:-35px;padding-inline:9px}
+ .profile-head>.person-avatar,.profile-head>.person-avatar.has-frame{width:70px;height:70px;border-radius:18px}
+ .profile-head>.titles{padding-top:44px}
+ .profile-head>.titles h1{font-size:clamp(21px,5.8vw,27px)}
+ .bf-public-profile .section-head .btn{flex-shrink:0}
+}
+/* Polished transitions on new pages; link navigation remains ordinary browser navigation. */
+@keyframes bfPageAppear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bfSpin{to{transform:rotate(360deg)}}
+@keyframes bfPulse{0%,100%{opacity:.48}50%{opacity:1}}
+@keyframes bfGrow{0%{transform:scaleX(.05)}65%{transform:scaleX(.72)}100%{transform:scaleX(.92)}}
+.content{animation:bfPageAppear .48s var(--bf-fast) both}
+.social-post,.org-card,.card,.profile-story{backface-visibility:hidden}
+.btn:active,.icon-action:active{transform:scale(.97)}
+.btn:focus-visible,a:focus-visible{outline-offset:3px}
+/* Navigation overlay: shown only when clicking internal links or submitting a form. */
+#bf-nav-loading{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;
+ background:rgba(247,246,251,.92);backdrop-filter:blur(13px);isolation:isolate;
+ animation:bfFadeIn .15s ease-out both}
+@keyframes bfFadeIn{from{opacity:0}to{opacity:1}}
+#bf-nav-loading .bf-load-card{display:flex;flex-direction:column;align-items:center;gap:10px;
+ border:1px solid #e2ddf1;background:#fff;box-shadow:0 24px 85px #33275227;
+ border-radius:25px;padding:28px 35px;min-width:230px;max-width:calc(100vw - 40px)}
+#bf-nav-loading .bf-load-mark{width:52px;height:52px;display:grid;place-items:center;
+ background:linear-gradient(140deg,#8b6df2,#8ae5c5);border-radius:16px;
+ color:#fff;font-weight:900;font-size:31px;box-shadow:0 8px 18px #7850cc33}
+#bf-nav-loading .bf-load-ring{width:23px;height:23px;border:3px solid #ded6f8;
+ border-top-color:#7856dd;border-radius:50%;animation:bfSpin .78s linear infinite}
+#bf-nav-loading .bf-load-title{font:800 15px/1.4 'Plus Jakarta Sans',sans-serif;color:#2d2949}
+#bf-nav-loading .bf-load-sub{font-size:11px;color:#85809a}
+#bf-nav-loading .bf-load-track{width:100%;height:4px;background:#eeecf5;overflow:hidden;border-radius:99px}
+#bf-nav-loading .bf-load-track:after{content:'';display:block;height:100%;width:100%;
+ background:linear-gradient(90deg,#8064e9,#71dcb5);transform-origin:left;
+ animation:bfGrow 1.55s ease-in-out infinite alternate}
+html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opacity .18s,transform .18s}
+/* Image loading placeholders: decoded images appear with subtle fade. */
+.bf-image-loading{background:linear-gradient(100deg,#f0eef9 15%,#e1dff1 45%,#f0eef9 75%);
+ background-size:220% 100%;animation:bfShimmer 1.25s linear infinite}
+@keyframes bfShimmer{to{background-position-x:-220%}}
+.bf-image-loading img{opacity:.25;transition:opacity .35s ease}
+.bf-image-loaded img{opacity:1}
+@media(prefers-reduced-motion:reduce){
+ .content,#bf-nav-loading,#bf-nav-loading .bf-load-ring,#bf-nav-loading .bf-load-track:after,
+ .bf-image-loading{animation:none!important}
+ .social-post,.profile-story,.card,.btn{transition:none!important}
+}
+
+</style>
+</head>
+<body>
+{% set category_icons={'food':'🥫','clothing':'👕','hygiene':'🧼','books':'📚','furniture':'🪑','electronics':'💻','other':'📦'} %}
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="logo" href="{{ url_for('app.app_page') }}"><span class="mark">✳</span>Byfrost<em>.</em></a>
+  <div class="nav-label">COMMUNITY</div>
+  <nav class="nav">
+    {% for slug,icon,label in [('home','⌂','Your feed'),('explore','♡','Find a cause'),('organizations','◈','Nonprofits & businesses'),('map','⌖','Donation map'),('messages','✉','Messages'),('community','✦','All stories')] %}
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="nav-label">YOUR IMPACT</div>
+  <nav class="nav">
+    {% for slug,icon,label in [('leaderboard','♛','Top supporters'),('rewards','✧','Rewards'),('impact','◉','My contributions'),('workspace','▤','My workspace'),('people','☺','People')] %}
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="side-blurb"><strong>✦ Good grows together.</strong><p>Every contribution connects someone with something they need.</p></div>
+  <div class="profile-anchor">
+    <div class="account-menu" id="accountMenu" hidden>
+      <a href="{{ url_for('app.app_page',tab='profile') }}">☺ &nbsp; Account information</a>
+      {% if user['type']=='pessoa' %}<a href="{{ url_for('app.person_page',person_id=user['id']) }}">✦ &nbsp; My public profile</a>{% endif %}
+      <form method="POST" action="{{ url_for('login.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">↪ &nbsp; Log out</button></form>
+    </div>
+    <button class="profile-toggle" id="accountToggle" type="button" aria-expanded="false">
+      <span class="mini-avatar">{{ user['name'][:1]|upper }}</span><span class="identity"><strong>{{ user['name'] }}</strong><small>{{ 'Nonprofit' if user['type']=='ong' else 'Business' if user['type']=='empresa' else 'Individual' }}</small></span><span>⌃</span>
+    </button>
+  </div>
+</aside>
+<main class="main">
+<header class="topbar"><div class="flex"><button type="button" class="mobile-nav" id="mobileNav">☰</button><span class="crumb">Byfrost / {{ {'home':'Discover good','explore':'Requests','organizations':'Organizations','people':'People','community':'Community','map':'Collection points','leaderboard':'Top supporters','rewards':'Rewards','profile':'Account','workspace':'Workspace','impact':'Impact','messages':'Messages'}.get(tab,'Community') }}</span></div><div class="top-right"><span class="pill">✦ {{ 'Nonprofit account' if user['type']=='ong' else 'Business partner' if user['type']=='empresa' else 'Community member' }}</span><a class="btn outline small" href="{{ url_for('app.app_page',tab='explore') }}">♡ Find a cause</a></div></header>
+<div class="content">
+{% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}" role="alert">{{ message }}</div>{% endfor %}{% endwith %}
+
+{% if receipt is defined and receipt %}
+<section class="public-wrap"><div class="hero"><div><span class="eyebrow">Demonstration only</span><h1>Demo contribution created.</h1><p>R$ {{ '%.2f'|format(receipt['amount_cents']/100) }} for {{ receipt['campaign_title'] }} — no payment was processed and no XP was awarded.</p><a href="{{ url_for('app.app_page',tab='explore') }}" class="btn">Return to requests</a></div><div class="hero-art"><div class="orbit-avatar a">♡</div></div></div></section>
+{% elif public_person is defined and public_person %}
+<section class="public-wrap bf-public-profile">
+ <div class="profile-splash"></div><div class="profile-head"><div class="person-avatar">{% if public_person['has_photo'] %}<img src="{{ url_for('app.user_avatar',user_id=public_person['id']) }}" alt="Profile photo">{% else %}{{ public_person['name'][:1]|upper }}{% endif %}</div><div class="titles"><span class="eyebrow">Individual supporter</span><h1>{{ public_person['name'] }}</h1><p>{{ public_person['headline'] or 'Connecting kindness with action.' }}</p>{% for r in public_equipped if r['kind']=='title' %}<span class="badge">{{ r['symbol'] }} {{ r['name'] }}</span>{% endfor %}</div></div>
+ <div class="section grid grid3"><div class="card card-pad"><small>Confirmed donations</small><h2>{{ person_stats['confirmed_count'] }}</h2></div><div class="card card-pad"><small>Items contributed</small><h2>{{ person_stats['units'] }}</h2></div><div class="card card-pad"><small>Community followers</small><h2>{{ public_followers }}</h2></div></div>
+ <div class="grid grid2 section"><div class="card card-pad"><div class="section-head"><h2>About {{ public_person['name'] }}</h2>{% if public_person['id']!=user['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_person['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="person"><button class="btn small" type="submit">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_person['bio'] or 'This supporter has not written a bio yet.' }}</p><div class="sep"></div><span class="badge">Level {{ public_person['level'] }}</span> <span class="badge green">{{ public_person['city'] or 'Community-wide' }}</span></div>
+  <div class="card card-pad"><h2>Unlocked recognition</h2><div class="stack" style="margin-top:17px">{% for r in person_rewards %}<div class="flex"><span style="font-size:25px">{{ r['symbol'] }}</span><div><strong class="color-{{ r['color'] }}">{{ r['name'] }}</strong><div><small>From {{ r['org_name'] or 'a nonprofit' }} · {{ r['kind']|capitalize }}</small></div></div></div>{% else %}<p>No NGO rewards unlocked yet.</p>{% endfor %}</div></div></div>
+ <section class="section"><h2>Community updates</h2><div class="grid grid2" style="margin-top:16px">{% for post in person_posts %}<div class="card card-pad"><p style="white-space:pre-wrap;color:var(--ink)">{{ post['body'] }}</p><small>{{ post['created'] }}</small></div>{% else %}<div class="empty">No updates shared yet.</div>{% endfor %}</div></section>
+</section>
+{% elif public_org is defined and public_org %}
+<section class="public-wrap bf-public-profile"><div class="profile-splash"></div><div class="profile-head"><div class="person-avatar">{{ '✦' if public_org['type']=='ong' else '◈' }}</div><div class="titles"><span class="eyebrow">{{ 'Nonprofit organization' if public_org['type']=='ong' else 'Business partner' }}</span><h1>{{ public_org['display_name'] }}</h1><p>{{ (public_org['city'] or '') ~ (' · ' if public_org['city'] and public_org['state'] else '') ~ (public_org['state'] or '') }}</p></div></div>
+ <div class="section grid grid3"><div class="card card-pad"><small>Verified status</small><h3 style="margin-top:10px">{{ 'Verified ✓' if public_org['verified'] else 'Not verified' }}</h3></div><div class="card card-pad"><small>Confirmed contributions</small><h2>{{ org_stats['confirmed_count'] }}</h2></div><div class="card card-pad"><small>Community followers</small><h2>{{ public_followers }}</h2></div></div>
+ <div class="section grid grid2"><div class="card card-pad"><div class="section-head"><h2>About this organization</h2>{% if user['id']!=public_org['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_org['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="organization"><button class="btn small">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_org['description'] or 'This organization has not shared its story yet.' }}</p>{% if public_org['type']=='ong' %}<div class="sep"></div><strong>Our mission</strong><p>{{ public_org['mission'] or 'More details coming soon.' }}</p><span class="badge">{{ public_org['cause'] or 'Community support' }}</span>{% else %}<div class="sep"></div><span class="badge">{{ public_org['sector'] or 'Business partner' }}</span>{% endif %}</div>
+ <div class="card card-pad"><h2>Ways to participate</h2><p style="margin-top:10px">{{ 'Explore this nonprofit’s open campaigns and available community recognition.' if public_org['type']=='ong' else 'See the products and resources this business is making available.' }}</p><div class="stack" style="margin-top:18px">{% for r in org_rewards|default([]) %}<div class="flex" style="padding:9px 0"><span style="font-size:26px">{{ r['symbol'] }}</span><div><strong>{{ r['name'] }}</strong><div><small>Unlock after {{ r['min_confirmed'] }} confirmed donation(s)</small></div></div></div>{% endfor %}</div></div></div>
+ <div class="section grid grid2"><div><h2>{{ 'Active campaigns' if public_org['type']=='ong' else 'Available offers' }}</h2><div class="stack" style="margin-top:14px">{% if public_org['type']=='ong' %}{% for c in org_campaigns %}<div class="card card-pad"><span class="badge green">{{ c['category']|capitalize }}</span><h3 style="margin:9px 0">{{ c['title'] }}</h3><p>{{ c['description'] }}</p><a class="link" href="{{ url_for('app.app_page',tab='explore',org=public_org['id']) }}">Explore needs →</a></div>{% else %}<div class="empty">No active campaigns yet.</div>{% endfor %}{% else %}{% for o in org_offers %}<div class="card card-pad"><h3>{{ o['title'] }}</h3><p>{{ o['description'] }}</p><small>{{ o['quantity'] }} {{ o['unit'] }}</small></div>{% else %}<div class="empty">No offers available yet.</div>{% endfor %}{% endif %}</div></div>
+ <div><h2>Updates & stories</h2><p style="margin:7px 0 18px">Follow this organization to see its newest stories in your feed.</p>
+<div class="profile-story-grid">{% for p in org_posts %}
+<a class="profile-story" href="{{ url_for('app.app_page',tab='community') }}#post-{{ p['id'] }}">
+{% if p['has_image'] %}<img src="{{ url_for('app.post_image',post_id=p['id']) }}" loading="lazy" alt="Story photo">
+{% else %}<span class="profile-story-symbol">{{ '♡' if public_org['type']=='ong' else '✦' }}</span>{% endif %}
+<span class="profile-story-caption">{{ p['body']|truncate(78,True,'…') }}</span>
+{% if p['request_id'] %}<span class="profile-story-cta">♡ Donation request</span>{% endif %}
+</a>{% else %}<div class="empty">No updates published yet.</div>{% endfor %}</div></div></div>
+</section>
+{% else %}
+{% if tab=='home' %}
+<div class="social-layout">
+  <div class="social-stream">
+    <section class="social-heading">
+      <div><span class="eyebrow">THE GOOD SIDE OF SOCIAL</span>
+        <h1>{{ 'Your daily dose of good.' if tab=='home' else 'Stories that move people.' }}</h1>
+        <p>Follow people making a difference, discover needs and help an organization today.</p>
+      </div>
+      {% if user['type']=='ong' %}<a href="{{ url_for('app.app_page',tab='workspace',compose='request') }}" class="btn">+ New request</a>{% endif %}
+    </section>
+
+    <div class="story-strip" aria-label="Nonprofits and business stories">
+      {% for c in creators if c['type']!='pessoa' %}
+      {% if loop.index<=13 %}
+      <a class="story-bubble" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">
+        <span class="story-ring"><span class="story-avatar">{{ c['display_name'][:1]|upper }}</span></span>
+        <small>{{ c['display_name']|truncate(15,True,'…') }}</small>
+        <span class="story-role">{{ 'NGO' if c['type']=='ong' else 'Business' }}</span>
+      </a>
+      {% endif %}{% endfor %}
+      <a class="story-bubble story-more" href="{{ url_for('app.app_page',tab='organizations') }}"><span class="story-ring"><span class="story-avatar">＋</span></span><small>Explore all</small></a>
+    </div>
+
+    {% if user['type']!='pessoa' or user['public_profile'] %}
+    <form class="social-compose" method="POST" action="{{ url_for('app.create_post') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="compose-top"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><div><strong>Share something meaningful</strong><small>Small updates inspire big changes.</small></div></div>
+      <textarea name="body" required minlength="3" maxlength="1200" placeholder="What happened in your community today? Tell the story…"></textarea>
+      <div class="compose-extra">
+        <input name="tags" type="text" maxlength="200" placeholder="Tags: food, education, community…" aria-label="Post topic tags">
+        {% if user['type']=='ong' %}<select name="request_id" aria-label="Connect to a nonprofit request"><option value="">No request linked</option>{% for r in my_requests if r['status']=='open' %}<option value="{{ r['id'] }}">Support: {{ r['title']|truncate(30) }}</option>{% endfor %}</select>{% endif %}
+      </div>
+      <div class="compose-footer"><label class="photo-upload">📷 <span>Add photo</span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish story ↗</button></div>
+    </form>
+    {% else %}
+    <div class="social-compose muted-compose"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><p>Want to share your giving journey? <a class="link" href="{{ url_for('app.app_page',tab='profile') }}">Enable your public profile</a>.</p></div>
+    {% endif %}
+
+    <div class="feed-controls">
+      <div class="feed-toggle"><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="{{ 'selected' if feed_mode!='following' else '' }}">✦ For you</a>
+      <a href="{{ url_for('app.app_page',tab=tab,feed='following') }}" class="{{ 'selected' if feed_mode=='following' else '' }}">♡ Following</a></div>
+      <details class="interest-details"><summary>⚙ Your interests</summary>
+        <form method="POST" action="{{ url_for('app.update_interests') }}" class="interest-popover">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <strong>Personalize your feed</strong><p>Choose topics you care about. We also learn gently from posts you view, like or save.</p>
+          <label class="personalize-switch"><input type="checkbox" name="personalized" {{ 'checked' if personalization_enabled else '' }}> Use my activity to recommend causes</label>
+          <div class="interest-chips">{% for topic in all_topics %}<label><input type="checkbox" name="topics" value="{{ topic }}" {{ 'checked' if topic in pinned_topics else '' }}> #{{ topic }}</label>{% endfor %}</div>
+          <button type="submit" class="btn small">Save interests</button>
+          <button type="submit" name="choice" value="reset" class="btn outline small">Reset interests</button>
+        </form>
+      </details>
+    </div>
+    {% if feed %}
+    {% for p in feed %}
+    <article class="social-post" id="post-{{ p['id'] }}" data-observe-post="{{ p['id'] }}">
+      <header class="social-post-head">
+        <a class="creator-avatar" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'][:1]|upper }}</a>
+        <div class="creator-meta"><a class="creator-name" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'] }}</a>
+          <div class="creator-sub">{{ 'Nonprofit' if p['type']=='ong' else 'Business partner' if p['type']=='empresa' else 'Community member' }} · {{ p['created'][:10] }}</div></div>
+        <span class="creator-chip {{ 'ngo' if p['type']=='ong' else 'business' if p['type']=='empresa' else '' }}">{{ 'NGO' if p['type']=='ong' else 'Business' if p['type']=='empresa' else 'Member' }}</span>
+        <button class="post-menu-btn" data-post-hide="{{ p['id'] }}" title="Not interested in this post" aria-label="Not interested in this post">···</button>
+      </header>
+      {% if p['has_image'] %}
+      <div class="post-hero-image"><img src="{{ url_for('app.post_image',post_id=p['id']) }}" alt="Photo shared in this community story" loading="lazy"></div>
+      {% else %}
+      <div class="post-illustration illustration-{{ p['id']%5 }}"><div class="illustration-ring a"></div><div class="illustration-ring b"></div>
+        <span class="illustration-mark">{{ {'food':'🥫','clothing':'👕','education':'📚','health':'🩺','animals':'🐾','housing':'⌂','environment':'🌱','technology':'💻','community':'♡'}.get(p['topic_tags']|first or 'community','✧') }}</span>
+        <strong>{{ (p['topic_tags']|first or 'community')|replace('_',' ')|title }}</strong><small>EVERY ACT OF KINDNESS COUNTS</small>
+      </div>
+      {% endif %}
+      <div class="social-post-body">
+        <div class="post-action-line">
+          <form action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
+          <button class="icon-action" data-focus-comment="{{ p['id'] }}" title="Comment" aria-label="Comment">♧</button>
+          <button class="icon-action" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
+          <span class="spacer"></span><button class="icon-action {{ 'saved' if p['saved'] else '' }}" data-post-save="{{ p['id'] }}" title="Save post" aria-label="Save post">{{ '▣' if p['saved'] else '▢' }}</button>
+        </div>
+        <div class="post-engagement"><strong>{{ p['likes'] }} likes</strong><span>{{ p['comments_count'] }} comments</span></div>
+        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }}</div>
+        {% if p['topic_tags'] %}<div class="post-topics">{% for tag in p['topic_tags'] %}<span>#{{ tag }}</span>{% endfor %}</div>{% endif %}
+        {% if p['request_id'] and p['request_status']=='open' %}
+          {% set linked=needs|selectattr('id','equalto',p['request_id'])|first %}
+          <div class="post-donate-card"><div><small>ACTIVE NONPROFIT REQUEST</small><strong>{{ linked['title'] if linked else 'Help this nonprofit' }}</strong>
+            <span>{{ linked['category']|title if linked else 'Giving opportunity' }} · Donate items or arrange delivery</span></div>
+            <a href="{{ url_for('app.app_page',tab='explore',open_request=p['request_id']) }}" class="btn small">Help now ♡</a></div>
+        {% elif p['type']=='ong' %}<a class="post-project-link" href="{{ url_for('app.organization_page',organization_id=p['author_user_id']) }}">♡ Explore this nonprofit's projects →</a>{% endif %}
+        <div class="why-post">✧ {{ p['why_recommended'] }} <span>· Based on interests, follows & confirmed giving</span></div>
+        {% for cm in comments if cm['post_id']==p['id'] %}{% if loop.index<=2 %}<div class="post-comment"><strong>{{ cm['display_name'] }}</strong> {{ cm['body'] }}</div>{% endif %}{% endfor %}
+        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
+      </div>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="social-empty"><span>✦</span><h3>No stories here yet</h3><p>Explore new nonprofits or switch to For you to discover fresh causes.</p><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="btn">Explore stories</a></div>
+    {% endif %}
+  </div>
+  <aside class="social-right-rail">
+    <div class="rail-profile"><span class="rail-avatar">{{ user['name'][:1]|upper }}</span><div><strong>{{ user['name'] }}</strong><small>{{ 'Nonprofit' if user['type']=='ong' else 'Business' if user['type']=='empresa' else 'Community member' }}</small></div><a href="{{ url_for('app.app_page',tab='profile') }}">Edit</a></div>
+    <div class="rail-heading"><strong>Suggested for your community</strong><a href="{{ url_for('app.app_page',tab='organizations') }}">See all</a></div>
+    <div class="rail-suggestions">{% for c in creators if c['type']=='ong' and c['id']!=user['id'] %}{% if loop.index<=5 %}
+      <div class="rail-suggestion"><a class="suggest-avatar" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">{{ c['display_name'][:1]|upper }}</a><div><a href="{{ url_for('app.organization_page',organization_id=c['id']) }}">{{ c['display_name']|truncate(24,True,'…') }}</a><small>{{ (c['description'] or 'Nonprofit sharing impact')|truncate(36,True,'…') }}</small></div><a class="follow-inline" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">View</a></div>
+    {% endif %}{% endfor %}</div>
+    <div class="rail-feature"><span>♡ MAKE A DIFFERENCE</span><h3>Someone nearby may need what you can give.</h3><p>Explore real requests posted by nonprofit organizations.</p><a class="btn" href="{{ url_for('app.app_page',tab='explore') }}">Explore requests →</a></div>
+    <div class="rail-ranking"><div class="rail-heading"><strong>Community impact</strong><a href="{{ url_for('app.app_page',tab='leaderboard') }}">Leaderboard</a></div>
+      {% for person in rankings %}{% if loop.index<=3 %}<div class="rail-rank"><span class="rank-medal">{{ loop.index }}</span><strong>{{ person['display_name']|truncate(24,True,'…') }}</strong><small>{{ person['confirmed_count'] }} gifts</small></div>{% endif %}{% endfor %}
+    </div>
+    <small class="rail-footnote">Byfrost prioritizes matching causes and real-world giving. Demo payments never affect rankings.</small>
+  </aside>
+</div>
+
+{% elif tab=='explore' %}
+<div class="section-head"><div><span class="eyebrow">Need · Offer · Connect</span><h1>Find a way to help.</h1><p>Every request below comes from a nonprofit. Choose a cause, see the handover options, and contribute.</p></div>{% if user['type']=='ong' %}<a href="{{ url_for('app.app_page',tab='workspace',compose='request') }}" class="btn">+ Publish request</a>{% endif %}</div>
+<div class="card card-pad" style="margin:25px 0"><div class="top-filters"><input class="search" id="requestSearch" placeholder="Search needs, nonprofits, cities…" aria-label="Search requests"><select class="search" id="categoryFilter"><option value="">All categories</option>{% for key,label in [('food','Food'),('clothing','Clothing'),('hygiene','Hygiene'),('books','Books'),('furniture','Furniture'),('electronics','Electronics'),('other','Other')] %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select><select class="search" id="kindFilter"><option value="">All listings</option><option value="need">Requests for donations</option><option value="giveaway">Free items to collect</option></select></div><small style="display:block;margin-top:11px"><span id="requestCount">{{ needs|length }}</span> open listings · demo data may be included</small></div>
+<div class="grid grid3" id="requestGrid">{% for r in needs %}<article class="card request-card need-card" data-search="{{ (r['title'] ~ ' ' ~ r['description'] ~ ' ' ~ r['display_name'] ~ ' ' ~ (r['ngo_city'] or ''))|lower|e }}" data-category="{{ r['category'] }}" data-kind="{{ r['kind'] }}" data-ngo="{{ r['ngo_user_id'] }}"><div class="request-cover" style="background:{{ {'food':'#e8dcff','clothing':'#ffebda','books':'#d6f5e8','hygiene':'#deecff','furniture':'#f8e8bc','electronics':'#eee2ff','other':'#eeeef8'}.get(r['category'],'#eeeef8') }}"><span class="category-emoji">{{ category_icons.get(r['category'],'📦') }}</span><span class="badge {{ 'green' if r['kind']=='giveaway' else '' }}">{{ 'Free to collect' if r['kind']=='giveaway' else 'Needs support' }}</span></div><div class="inner"><a class="link" href="{{ url_for('app.organization_page',organization_id=r['ngo_user_id']) }}">{{ r['display_name'] }}</a><h3>{{ r['title'] }}</h3><p>{{ r['description'] }}</p><span class="text-sm">📍 {{ r['ngo_city'] or 'Location on request' }}</span>{% if r['kind']=='need' %}<div class="flex between text-xs"><strong>{{ r['delivered'] }} / {{ r['quantity'] }} {{ r['unit'] }}</strong><span class="text-muted">{{ (r['delivered']/r['quantity']*100)|round|int if r['quantity'] else 0 }}% fulfilled</span></div><div class="progress"><span style="width:{{ [100,(r['delivered']/r['quantity']*100)]|min if r['quantity'] else 0 }}%"></span></div>{% else %}<strong class="text-sm">{{ r['quantity'] }} {{ r['unit'] }} available</strong>{% endif %}<div class="flex between" style="margin-top:auto"><span class="badge gray">{{ r['category']|capitalize }}</span><button type="button" class="btn small" data-open="need-{{ r['id'] }}">{{ 'Request items' if r['kind']=='giveaway' else 'Help this cause' }} →</button></div></div></article>{% endfor %}</div><div class="empty" id="noMatches" hidden>No listings match these filters.</div>
+{% for r in needs %}
+<dialog class="modal" id="need-{{ r['id'] }}"><div class="modal-head"><div><small>{{ r['display_name'] }}</small><h2>{{ r['title'] }}</h2></div><button type="button" class="x" data-close>×</button></div><div class="modal-body"><div class="cover-art">{{ category_icons.get(r['category'],'📦') }}</div><div class="flex wrap" style="margin:17px 0"><span class="badge green">{{ r['category']|capitalize }}</span><span class="badge">{{ r['quantity'] }} {{ r['unit'] }}</span><span class="badge gray">{{ 'Giveaway' if r['kind']=='giveaway' else 'Donation request' }}</span></div><p>{{ r['description'] }}</p><div class="sep"></div><div class="flex wrap between"><a class="link" href="{{ url_for('app.organization_page',organization_id=r['ngo_user_id']) }}">See nonprofit profile ↗</a><a class="link" href="{{ url_for('app.app_page',tab='map',request=r['id']) }}">See associated collection points ↗</a></div><div class="sep"></div>
+{% if r['kind']=='need' and user['type'] in ('pessoa','empresa') %}<h3>Offer this nonprofit a donation</h3><form method="POST" action="{{ url_for('app.pledge_donation',request_id=r['id']) }}" class="form-grid" style="margin-top:13px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>How many {{ r['unit'] }}?</label><input type="number" name="quantity" min="1" max="{{ r['quantity'] }}" value="1" required></div><div class="field"><label>Handover method</label><select name="method" required>{% if r['allow_dropoff'] %}<option value="dropoff">I'll deliver to a collection point</option>{% endif %}{% if r['allow_pickup'] %}<option value="pickup">The nonprofit can collect</option>{% endif %}{% if r['allow_contact'] %}<option value="contact">Contact me to coordinate</option>{% endif %}</select></div><button class="btn wide" type="submit">Commit to donate →</button></form><small>This is a commitment; the nonprofit confirms physical delivery before granting impact points.</small>
+{% elif r['kind']=='giveaway' and user['type']=='pessoa' and r['allow_claims'] %}<h3>Reserve available items</h3><form method="POST" action="{{ url_for('app.claim_items',request_id=r['id']) }}" class="form-grid" style="margin-top:13px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Quantity</label><input type="number" name="quantity" value="1" min="1" max="{{ r['quantity'] }}" required></div><button class="btn wide">Request pickup →</button></form>
+{% else %}<p>{{ 'Manage this request in your nonprofit workspace.' if user['type']=='ong' else 'Contact the nonprofit to learn more.' }}</p>{% endif %}
+{% if r['allow_contact'] and user['id']!=r['ngo_user_id'] %}<form action="{{ url_for('app.send_message') }}" method="POST" class="stack" style="margin-top:18px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="recipient_id" value="{{ r['ngo_user_id'] }}"><input type="hidden" name="request_id" value="{{ r['id'] }}"><div class="field"><label>Message to the nonprofit</label><textarea name="body" maxlength="1000" placeholder="Hi! I'd like to know how I can help…" required></textarea></div><button class="btn outline">Send message ↗</button></form>{% endif %}</div></dialog>
+{% endfor %}
+{% if user['type']=='empresa' %}<section class="section"><div class="section-head"><div><span class="eyebrow">Prototype only · no real money</span><h2>Demo financial support</h2><p>Experiment with a simulated contribution where nonprofits have enabled it. No charge occurs.</p></div></div><div class="grid grid3">{% for c in campaigns if c['allow_money_demo'] %}<div class="card card-pad"><span class="badge gold">Demo only</span><h3 style="margin:11px 0">{{ c['title'] }}</h3><p>{{ c['description']|truncate(140) }}</p><form method="POST" action="{{ url_for('app.demo_donation') }}" class="stack" style="margin-top:12px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="campaign_id" value="{{ c['id'] }}"><div class="field"><label>Simulated amount</label><select name="amount"><option value="10">R$ 10</option><option value="25">R$ 25</option><option value="50">R$ 50</option><option value="100">R$ 100</option></select></div><button class="btn outline">Generate demo receipt →</button></form></div>{% else %}<div class="empty">No nonprofit campaigns have enabled demo payments.</div>{% endfor %}</div></section>{% endif %}
+{% elif tab in ('organizations','people') %}
+<div class="section-head"><div><span class="eyebrow">A community of changemakers</span><h1>{{ 'Meet the people' if tab=='people' else 'Meet the organizations' }}.</h1><p>{{ 'Supporters sharing their impact and building connections.' if tab=='people' else 'Discover nonprofits in need and businesses making a difference.' }}</p></div></div>
+<div class="card card-pad" style="margin:24px 0"><div class="top-filters"><input class="search" id="orgSearch" placeholder="Search names, causes, descriptions…"><select class="search" id="orgFilter">{% if tab=='people' %}<option value="pessoa">Individuals</option>{% else %}<option value="">All organizations</option><option value="ong">Nonprofits</option><option value="empresa">Businesses</option>{% endif %}</select></div><div class="flex between" style="margin-top:10px"><small><span id="orgCount">0</span> profiles available</small><small>Profiles are loaded from registered accounts</small></div></div>
+<div class="grid grid4" id="orgGrid">{% for o in creators if (tab=='people' and o['type']=='pessoa') or (tab=='organizations' and o['type']!='pessoa') %}<article class="card org-card org-item" data-kind="{{ o['type'] }}" data-search="{{ (o['display_name'] ~ ' ' ~ (o['description'] or '') ~ ' ' ~ (o['city'] or ''))|lower|e }}"><div class="org-banner {{ 'company' if o['type']=='empresa' }}"></div><div class="body"><span class="person-avatar">{% if o['type']=='pessoa' %}☺{% elif o['type']=='ong' %}✦{% else %}◈{% endif %}</span><span class="badge {{ 'green' if o['type']=='ong' else 'gold' if o['type']=='empresa' else '' }}">{{ 'Nonprofit' if o['type']=='ong' else 'Business' if o['type']=='empresa' else 'Individual' }}</span><h3>{{ o['display_name'] }}</h3><p>{{ (o['description'] or 'Connecting the community through giving.')|truncate(145) }}</p><div class="meta"><small>♡ {{ o['followers'] }} followers</small>{% if o['verified'] %}<span class="badge green">Verified</span>{% endif %}</div><a class="btn outline small full" href="{{ url_for('app.person_page',person_id=o['id']) if o['type']=='pessoa' else url_for('app.organization_page',organization_id=o['id']) }}">View profile →</a></div></article>{% else %}<div class="empty">No public profiles yet. Individuals can enable theirs in Account settings.</div>{% endfor %}</div><div class="empty" id="noOrgs" hidden>No profiles match your search.</div>
+{% elif tab=='community' %}
+<div class="social-layout">
+  <div class="social-stream">
+    <section class="social-heading">
+      <div><span class="eyebrow">THE GOOD SIDE OF SOCIAL</span>
+        <h1>{{ 'Your daily dose of good.' if tab=='home' else 'Stories that move people.' }}</h1>
+        <p>Follow people making a difference, discover needs and help an organization today.</p>
+      </div>
+      {% if user['type']=='ong' %}<a href="{{ url_for('app.app_page',tab='workspace',compose='request') }}" class="btn">+ New request</a>{% endif %}
+    </section>
+
+    <div class="story-strip" aria-label="Nonprofits and business stories">
+      {% for c in creators if c['type']!='pessoa' %}
+      {% if loop.index<=13 %}
+      <a class="story-bubble" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">
+        <span class="story-ring"><span class="story-avatar">{{ c['display_name'][:1]|upper }}</span></span>
+        <small>{{ c['display_name']|truncate(15,True,'…') }}</small>
+        <span class="story-role">{{ 'NGO' if c['type']=='ong' else 'Business' }}</span>
+      </a>
+      {% endif %}{% endfor %}
+      <a class="story-bubble story-more" href="{{ url_for('app.app_page',tab='organizations') }}"><span class="story-ring"><span class="story-avatar">＋</span></span><small>Explore all</small></a>
+    </div>
+
+    {% if user['type']!='pessoa' or user['public_profile'] %}
+    <form class="social-compose" method="POST" action="{{ url_for('app.create_post') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="compose-top"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><div><strong>Share something meaningful</strong><small>Small updates inspire big changes.</small></div></div>
+      <textarea name="body" required minlength="3" maxlength="1200" placeholder="What happened in your community today? Tell the story…"></textarea>
+      <div class="compose-extra">
+        <input name="tags" type="text" maxlength="200" placeholder="Tags: food, education, community…" aria-label="Post topic tags">
+        {% if user['type']=='ong' %}<select name="request_id" aria-label="Connect to a nonprofit request"><option value="">No request linked</option>{% for r in my_requests if r['status']=='open' %}<option value="{{ r['id'] }}">Support: {{ r['title']|truncate(30) }}</option>{% endfor %}</select>{% endif %}
+      </div>
+      <div class="compose-footer"><label class="photo-upload">📷 <span>Add photo</span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish story ↗</button></div>
+    </form>
+    {% else %}
+    <div class="social-compose muted-compose"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><p>Want to share your giving journey? <a class="link" href="{{ url_for('app.app_page',tab='profile') }}">Enable your public profile</a>.</p></div>
+    {% endif %}
+
+    <div class="feed-controls">
+      <div class="feed-toggle"><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="{{ 'selected' if feed_mode!='following' else '' }}">✦ For you</a>
+      <a href="{{ url_for('app.app_page',tab=tab,feed='following') }}" class="{{ 'selected' if feed_mode=='following' else '' }}">♡ Following</a></div>
+      <details class="interest-details"><summary>⚙ Your interests</summary>
+        <form method="POST" action="{{ url_for('app.update_interests') }}" class="interest-popover">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <strong>Personalize your feed</strong><p>Choose topics you care about. We also learn gently from posts you view, like or save.</p>
+          <label class="personalize-switch"><input type="checkbox" name="personalized" {{ 'checked' if personalization_enabled else '' }}> Use my activity to recommend causes</label>
+          <div class="interest-chips">{% for topic in all_topics %}<label><input type="checkbox" name="topics" value="{{ topic }}" {{ 'checked' if topic in pinned_topics else '' }}> #{{ topic }}</label>{% endfor %}</div>
+          <button type="submit" class="btn small">Save interests</button>
+          <button type="submit" name="choice" value="reset" class="btn outline small">Reset interests</button>
+        </form>
+      </details>
+    </div>
+    {% if feed %}
+    {% for p in feed %}
+    <article class="social-post" id="post-{{ p['id'] }}" data-observe-post="{{ p['id'] }}">
+      <header class="social-post-head">
+        <a class="creator-avatar" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'][:1]|upper }}</a>
+        <div class="creator-meta"><a class="creator-name" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'] }}</a>
+          <div class="creator-sub">{{ 'Nonprofit' if p['type']=='ong' else 'Business partner' if p['type']=='empresa' else 'Community member' }} · {{ p['created'][:10] }}</div></div>
+        <span class="creator-chip {{ 'ngo' if p['type']=='ong' else 'business' if p['type']=='empresa' else '' }}">{{ 'NGO' if p['type']=='ong' else 'Business' if p['type']=='empresa' else 'Member' }}</span>
+        <button class="post-menu-btn" data-post-hide="{{ p['id'] }}" title="Not interested in this post" aria-label="Not interested in this post">···</button>
+      </header>
+      {% if p['has_image'] %}
+      <div class="post-hero-image"><img src="{{ url_for('app.post_image',post_id=p['id']) }}" alt="Photo shared in this community story" loading="lazy"></div>
+      {% else %}
+      <div class="post-illustration illustration-{{ p['id']%5 }}"><div class="illustration-ring a"></div><div class="illustration-ring b"></div>
+        <span class="illustration-mark">{{ {'food':'🥫','clothing':'👕','education':'📚','health':'🩺','animals':'🐾','housing':'⌂','environment':'🌱','technology':'💻','community':'♡'}.get(p['topic_tags']|first or 'community','✧') }}</span>
+        <strong>{{ (p['topic_tags']|first or 'community')|replace('_',' ')|title }}</strong><small>EVERY ACT OF KINDNESS COUNTS</small>
+      </div>
+      {% endif %}
+      <div class="social-post-body">
+        <div class="post-action-line">
+          <form action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
+          <button class="icon-action" data-focus-comment="{{ p['id'] }}" title="Comment" aria-label="Comment">♧</button>
+          <button class="icon-action" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
+          <span class="spacer"></span><button class="icon-action {{ 'saved' if p['saved'] else '' }}" data-post-save="{{ p['id'] }}" title="Save post" aria-label="Save post">{{ '▣' if p['saved'] else '▢' }}</button>
+        </div>
+        <div class="post-engagement"><strong>{{ p['likes'] }} likes</strong><span>{{ p['comments_count'] }} comments</span></div>
+        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }}</div>
+        {% if p['topic_tags'] %}<div class="post-topics">{% for tag in p['topic_tags'] %}<span>#{{ tag }}</span>{% endfor %}</div>{% endif %}
+        {% if p['request_id'] and p['request_status']=='open' %}
+          {% set linked=needs|selectattr('id','equalto',p['request_id'])|first %}
+          <div class="post-donate-card"><div><small>ACTIVE NONPROFIT REQUEST</small><strong>{{ linked['title'] if linked else 'Help this nonprofit' }}</strong>
+            <span>{{ linked['category']|title if linked else 'Giving opportunity' }} · Donate items or arrange delivery</span></div>
+            <a href="{{ url_for('app.app_page',tab='explore',open_request=p['request_id']) }}" class="btn small">Help now ♡</a></div>
+        {% elif p['type']=='ong' %}<a class="post-project-link" href="{{ url_for('app.organization_page',organization_id=p['author_user_id']) }}">♡ Explore this nonprofit's projects →</a>{% endif %}
+        <div class="why-post">✧ {{ p['why_recommended'] }} <span>· Based on interests, follows & confirmed giving</span></div>
+        {% for cm in comments if cm['post_id']==p['id'] %}{% if loop.index<=2 %}<div class="post-comment"><strong>{{ cm['display_name'] }}</strong> {{ cm['body'] }}</div>{% endif %}{% endfor %}
+        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
+      </div>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="social-empty"><span>✦</span><h3>No stories here yet</h3><p>Explore new nonprofits or switch to For you to discover fresh causes.</p><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="btn">Explore stories</a></div>
+    {% endif %}
+  </div>
+  <aside class="social-right-rail">
+    <div class="rail-profile"><span class="rail-avatar">{{ user['name'][:1]|upper }}</span><div><strong>{{ user['name'] }}</strong><small>{{ 'Nonprofit' if user['type']=='ong' else 'Business' if user['type']=='empresa' else 'Community member' }}</small></div><a href="{{ url_for('app.app_page',tab='profile') }}">Edit</a></div>
+    <div class="rail-heading"><strong>Suggested for your community</strong><a href="{{ url_for('app.app_page',tab='organizations') }}">See all</a></div>
+    <div class="rail-suggestions">{% for c in creators if c['type']=='ong' and c['id']!=user['id'] %}{% if loop.index<=5 %}
+      <div class="rail-suggestion"><a class="suggest-avatar" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">{{ c['display_name'][:1]|upper }}</a><div><a href="{{ url_for('app.organization_page',organization_id=c['id']) }}">{{ c['display_name']|truncate(24,True,'…') }}</a><small>{{ (c['description'] or 'Nonprofit sharing impact')|truncate(36,True,'…') }}</small></div><a class="follow-inline" href="{{ url_for('app.organization_page',organization_id=c['id']) }}">View</a></div>
+    {% endif %}{% endfor %}</div>
+    <div class="rail-feature"><span>♡ MAKE A DIFFERENCE</span><h3>Someone nearby may need what you can give.</h3><p>Explore real requests posted by nonprofit organizations.</p><a class="btn" href="{{ url_for('app.app_page',tab='explore') }}">Explore requests →</a></div>
+    <div class="rail-ranking"><div class="rail-heading"><strong>Community impact</strong><a href="{{ url_for('app.app_page',tab='leaderboard') }}">Leaderboard</a></div>
+      {% for person in rankings %}{% if loop.index<=3 %}<div class="rail-rank"><span class="rank-medal">{{ loop.index }}</span><strong>{{ person['display_name']|truncate(24,True,'…') }}</strong><small>{{ person['confirmed_count'] }} gifts</small></div>{% endif %}{% endfor %}
+    </div>
+    <small class="rail-footnote">Byfrost prioritizes matching causes and real-world giving. Demo payments never affect rankings.</small>
+  </aside>
+</div>
+
+{% elif tab=='leaderboard' %}
+<div class="section-head"><div><span class="eyebrow">Celebrating real impact</span><h1>Community leaderboard.</h1><p>Ranked by completed physical donations. Demo payments and unconfirmed pledges never count.</p></div></div>
+<div class="grid grid2 section"><div class="card card-pad"><div class="flex between"><h2>🏆 Business champions</h2><span class="badge gold">Confirmed only</span></div><div class="sep"></div>{% set company_ranks=rankings|selectattr('type','equalto','empresa')|list %}{% for r in company_ranks %}<div class="rank-item"><span class="rank-number">{{ '🥇' if loop.index==1 else '🥈' if loop.index==2 else '🥉' if loop.index==3 else loop.index }}</span><span class="person-avatar">◈</span><div style="flex:1;min-width:0"><a href="{{ url_for('app.organization_page',organization_id=r['id']) }}"><strong>{{ r['display_name'] }}</strong></a><small>{{ r['active_symbol'] or '♡' }} {{ r['active_title'] or (r['confirmed_count']|string ~ ' confirmed gifts') }}</small></div><span class="rank-score">{{ r['units'] }} units</span></div>{% else %}<div class="empty">No business deliveries have been confirmed yet.</div>{% endfor %}</div>
+<div class="card card-pad"><div class="flex between"><h2>✨ Individual champions</h2><span class="badge green">Opt-in profiles</span></div><div class="sep"></div>{% set people_ranks=rankings|selectattr('type','equalto','pessoa')|list %}{% for r in people_ranks %}<div class="rank-item"><span class="rank-number">{{ '🥇' if loop.index==1 else '🥈' if loop.index==2 else '🥉' if loop.index==3 else loop.index }}</span><span class="person-avatar">☺</span><div style="flex:1;min-width:0"><a href="{{ url_for('app.person_page',person_id=r['id']) }}"><strong>{{ r['display_name'] }}</strong></a><small>{{ r['active_symbol'] or '♡' }} {{ r['active_title'] or (r['confirmed_count']|string ~ ' confirmed gifts') }}</small></div><span class="rank-score">{{ r['units'] }} units</span></div>{% else %}<div class="empty"><strong>No individuals ranked yet.</strong><p>Members must opt in under Account settings. Confirmed contributions count automatically.</p></div>{% endfor %}</div></div>
+{% elif tab=='rewards' %}
+<div class="section-head"><div><span class="eyebrow">Your impact, your style</span><h1>Community rewards.</h1><p>Nonprofits create unique titles, avatar frames and profile accents. You unlock them by completing physical donations to their causes.</p></div></div>
+{% if user['type']=='ong' %}<section class="card card-pad section"><div class="section-head"><div><span class="eyebrow">For nonprofit creators</span><h2>Design a reward for your supporters</h2><p>Reward verified help, not just clicks or promises.</p></div></div><form action="{{ url_for('app.create_ngo_reward') }}" method="POST" class="form-grid"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Reward name</label><input name="name" required maxlength="46" placeholder="e.g. Hope Keeper"></div><div class="field"><label>Cosmetic type</label><select name="kind"><option value="title">Profile title</option><option value="frame">Avatar frame</option><option value="accent">Profile color accent</option></select></div><div class="field"><label>Icon or symbol (1–4 chars)</label><input name="symbol" maxlength="4" value="✦" required></div><div class="field"><label>Theme color</label><select name="color"><option value="violet">Violet</option><option value="mint">Mint</option><option value="gold">Gold</option><option value="coral">Coral</option><option value="sky">Sky</option></select></div><div class="field"><label>Donations confirmed to your NGO required</label><input name="min_confirmed" type="number" min="1" max="50" value="1" required></div><div class="field wide"><label>Description</label><textarea name="description" maxlength="200" placeholder="What does this recognition mean?"></textarea></div><button class="btn wide">Create community reward ✦</button></form><div class="sep"></div><div class="flex wrap">{% for r in my_created_rewards %}<span class="badge">{{ r['symbol'] }} {{ r['name'] }} ({{ r['min_confirmed'] }} gifts)</span>{% endfor %}</div></section>{% endif %}
+<section class="section"><div class="section-head"><div><h2>Your unlocked collection</h2><p>Equip a title, avatar frame or accent to personalize your public profile.</p></div></div><div class="flex wrap" style="margin-bottom:18px">{% for kind,label in [('title','Clear title'),('frame','Clear frame'),('accent','Clear accent')] %}<form method="POST" action="{{ url_for('app.equip_reward') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="{{ kind }}"><input type="hidden" name="reward_id" value="0"><button class="btn outline small" type="submit">{{ label }}</button></form>{% endfor %}</div><div class="grid grid3">{% for r in my_rewards %}<article class="card reward-card" data-color="{{ r['color'] }}"><span class="reward-symbol">{{ r['symbol'] }}</span><div><span class="badge green">Unlocked ✓</span><h3 style="margin-top:8px">{{ r['name'] }}</h3><p>{{ r['description'] or 'A symbol of your generosity.' }}</p><small>From {{ r['ngo_display'] or 'a nonprofit' }} · {{ r['kind']|capitalize }}</small></div><form action="{{ url_for('app.equip_reward') }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="reward_id" value="{{ r['id'] }}"><input type="hidden" name="kind" value="{{ r['kind'] }}"><button class="btn full small">Equip {{ r['kind'] }}</button></form></article>{% else %}<div class="empty"><strong>Your reward shelf is ready.</strong><p>Contribute to a nonprofit and have your donation confirmed to unlock cosmetics.</p><a href="{{ url_for('app.app_page',tab='explore') }}" class="btn small">Find a request →</a></div>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><div><h2>Made by the nonprofits you support</h2><p>Support causes you care about to unlock their special recognition.</p></div></div><div class="grid grid4">{% for r in rewards %}<article class="card reward-card" data-color="{{ r['color'] }}"><span class="reward-symbol">{{ r['symbol'] }}</span><div><span class="badge {{ 'green' if r['unlocked'] else '' }}">{{ '✓ Unlocked' if r['unlocked'] else '🔒 Locked' }}</span><h3 style="margin:9px 0">{{ r['name'] }}</h3><p>{{ r['description'] or 'A token of community impact.' }}</p><a class="link" href="{{ url_for('app.organization_page',organization_id=r['ngo_user_id']) }}">{{ r['org_name'] }} ↗</a><div><small>{{ r['min_confirmed'] }} confirmed donation(s) to unlock · {{ r['kind'] }}</small></div></div></article>{% else %}<div class="empty">No NGO-created cosmetics yet. Nonprofits can create their first title in this section.</div>{% endfor %}</div></section>
+{% elif tab=='map' %}
+<div class="section-head"><div><span class="eyebrow">Local giving</span><h1>Collection point map.</h1><p>See collection places provided by nonprofits. Check instructions with the organization before visiting.</p></div></div><div class="need-map section"><div class="map" id="collectionMap" role="application" aria-label="Nonprofit collection points"></div><div class="stack" style="align-content:start"><div class="card card-pad"><h3>Find a collection point</h3><p class="text-sm">{{ map_points|length }} locations registered · Some may be fictional demo locations</p><button class="btn outline small" id="locateMe" type="button" style="margin-top:10px">⌖ Use my location</button></div><div class="map-list" id="mapPointList">{% for p in map_points %}<button type="button" class="point-link" data-point="{{ p['id'] }}"><strong>{{ p['name'] }}</strong><div><small>{{ p['ngo'] }} · {{ p['city'] }}, {{ p['state'] }}</small></div><div><small>{{ p['instructions'] }}</small></div></button>{% else %}<div class="empty">Nonprofits have not added collection points yet.</div>{% endfor %}</div></div></div><div class="card card-pad"><strong>Map safety</strong><p>Only published points should be listed. Never share private home addresses without consent.</p></div>
+{% elif tab=='workspace' %}
+<div class="section-head"><div><span class="eyebrow">Make an impact</span><h1>{{ 'Your nonprofit workspace' if user['type']=='ong' else 'Your contribution hub' }}.</h1><p>{{ 'Create requests, manage donations and tell your community what you need.' if user['type']=='ong' else 'Share resources and follow the impact of your contributions.' }}</p></div></div>
+{% if user['type']=='ong' %}
+<section class="grid grid3 section"><button class="card feature-card" type="button" data-open="createRequest"><span class="blob">📣</span><span><strong>Publish a request</strong><small>3-step guided flow</small></span></button><button class="card feature-card" type="button" data-open="createPoint"><span class="blob">📍</span><span><strong>Add collection point</strong><small>Where supporters drop off items</small></span></button><button class="card feature-card" type="button" data-open="createCampaign"><span class="blob">♡</span><span><strong>Launch a campaign</strong><small>Set a shared goal</small></span></button></section>
+<section class="section"><div class="section-head"><h2>Your open requests</h2></div><div class="grid grid2">{% for r in my_requests %}<div class="card card-pad"><div class="flex between"><span class="badge {{ 'green' if r['status']=='open' else 'gray' }}">{{ r['status']|capitalize }}</span><small>{{ r['category']|capitalize }}</small></div><h3 style="margin:13px 0">{{ r['title'] }}</h3><p>{{ r['description']|truncate(160) }}</p><div class="flex between" style="margin-top:13px"><small>{{ r['quantity'] }} {{ r['unit'] }}</small>{% if r['status']=='open' %}<form method="POST" action="{{ url_for('app.close_request',request_id=r['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn outline small" type="submit">Close listing</button></form>{% endif %}</div></div>{% else %}<div class="empty"><strong>No requests yet.</strong><p>Start by creating your first community need.</p><button class="btn" data-open="createRequest">Create request →</button></div>{% endfor %}</div></section>
+<section class="section"><h2>Donations awaiting confirmation</h2><div class="grid grid2" style="margin-top:16px">{% for d in incoming %}<div class="card card-pad"><div class="flex between"><strong>{{ d['donor_name'] }}</strong><span class="badge {{ 'green' if d['status']=='confirmed' else '' }}">{{ d['status'] }}</span></div><p>{{ d['quantity'] }} units · {{ d['request_title'] or d['offer_title'] or 'General donation' }}</p>{% if d['status']=='pledged' %}<form method="POST" action="{{ url_for('app.confirm_donation',donation_id=d['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn mint small">Confirm received ✓</button></form>{% endif %}</div>{% else %}<div class="empty">No donations submitted yet.</div>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><div><h2>Offers from people and businesses</h2><p>Accept useful resources and coordinate delivery with the donor.</p></div></div><div class="grid grid3">{% for o in offers[:15] %}<div class="card card-pad"><span class="badge {{ 'gold' if o['donor_type']=='empresa' else 'green' }}">{{ 'Business partner' if o['donor_type']=='empresa' else 'Individual donor' }}</span><h3 style="margin:12px 0">{{ o['title'] }}</h3><p>{{ o['description']|truncate(130) }}</p><div class="flex between" style="margin-top:12px"><small>{{ o['quantity'] }} {{ o['unit'] }} · {{ o['display_name'] }}</small><form method="POST" action="{{ url_for('app.accept_offer',offer_id=o['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn small mint">Accept offer →</button></form></div></div>{% else %}<div class="empty">No offers available right now.</div>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><h2>Requests to collect items</h2></div><div class="grid grid2">{% for c in incoming_claims %}<div class="card card-pad"><strong>{{ c['recipient_name'] }}</strong><p>{{ c['quantity'] }} · {{ c['item_title'] }}</p><div class="flex between"><span class="badge">{{ c['status'] }}</span>{% if c['status']=='reserved' %}<form method="POST" action="{{ url_for('app.confirm_claim',claim_id=c['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn mint small">Confirm collection ✓</button></form>{% endif %}</div></div>{% else %}<div class="empty">No item reservations yet.</div>{% endfor %}</div></section>
+<section class="section grid grid2"><div class="card card-pad"><h2>Your collection points</h2><div class="stack" style="margin-top:14px">{% for pt in my_points %}<div class="float-mission"><strong>{{ pt['name'] }}</strong><div><small>{{ pt['address'] }} · {{ pt['city'] }}</small></div></div>{% else %}<p>No collection points yet. Add one before publishing a drop-off request.</p>{% endfor %}</div></div><div class="card card-pad"><h2>Your campaigns</h2><div class="stack" style="margin-top:14px">{% for c in my_campaigns %}<div class="float-mission"><strong>{{ c['title'] }}</strong><div><small>{{ c['target_quantity'] }} {{ c['unit'] }} · {{ c['status'] }}</small></div></div>{% else %}<p>No campaigns yet.</p>{% endfor %}</div></div></section>
+{% else %}
+<section class="section"><div class="card card-pad"><h2>Offer something useful</h2><p>Describe an item or resource you can share. Nonprofits can find and accept your offer.</p><form method="POST" action="{{ url_for('app.create_offer') }}" class="form-grid" style="margin-top:16px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Offer title</label><input name="title" placeholder="e.g. 20 boxes of rice" required maxlength="140"></div><div class="field"><label>Category</label><select name="category">{% for k in category_icons %}<option value="{{ k }}">{{ k|capitalize }}</option>{% endfor %}</select></div><div class="field"><label>Quantity</label><input type="number" name="quantity" min="1" value="1" required></div><div class="field"><label>Unit</label><input name="unit" value="items" maxlength="30" required></div><div class="field wide"><label>Description</label><textarea name="description" maxlength="1500" required placeholder="Condition, availability and handover options…"></textarea></div><button class="btn wide">Share offer →</button></form></div></section>
+<section class="section"><h2>Your active offers</h2><div class="grid grid3" style="margin-top:16px">{% for o in my_offers %}<div class="card card-pad"><span class="badge green">{{ o['status'] }}</span><h3 style="margin:12px 0">{{ o['title'] }}</h3><p>{{ o['description']|truncate(110) }}</p><small>{{ o['quantity'] }} {{ o['unit'] }}</small></div>{% else %}<div class="empty">Your shared offers will appear here.</div>{% endfor %}</div></section>
+{% if user['type']=='pessoa' %}<section class="section"><h2>Items you've requested from nonprofits</h2><div class="grid grid3" style="margin-top:14px">{% for c in my_claims %}<div class="card card-pad"><h3>{{ c['item_title'] }}</h3><p>{{ c['quantity'] }} unit(s) requested</p><span class="badge">{{ c['status'] }}</span></div>{% else %}<div class="empty">No reservations yet. Explore listings marked “Free to collect”.</div>{% endfor %}</div></section>{% endif %}
+{% endif %}
+{% elif tab=='impact' %}
+<div class="section-head"><div><span class="eyebrow">The impact you make</span><h1>Every act matters.</h1><p>Confirmed donations build your impact. Demo contributions never affect XP or rank.</p></div><a class="btn" href="{{ url_for('app.app_page',tab='rewards') }}">My rewards ✦</a></div><section class="grid grid3 section"><div class="card stat"><span class="icon">✦</span><strong>Level {{ user['level'] }}</strong><small>Community impact level</small></div><div class="card stat"><span class="icon">♡</span><strong>{{ user['amount'] }}</strong><small>Verified donations credited</small></div><div class="card stat"><span class="icon">✧</span><strong>{{ xp }} XP</strong><small>Impact experience earned</small></div></section><section class="section"><h2>Contribution history</h2><div class="stack" style="margin-top:14px">{% for d in my_donations %}<div class="card card-pad flex between wrap"><div><strong>{{ d['item_title'] or 'Donation to nonprofit' }}</strong><div><small>To {{ d['ngo_name'] }} · {{ d['quantity'] }} units</small></div></div><span class="badge {{ 'green' if d['status']=='confirmed' else '' }}">{{ d['status']|capitalize }}</span></div>{% else %}<div class="empty">Your history will appear after you support a request.</div>{% endfor %}</div></section><section class="section"><h2>Achievement badges</h2><div class="grid grid3" style="margin-top:14px">{% for b in badges %}<div class="card card-pad"><span style="font-size:31px">{{ '🏅' if b['earned'] else '🔒' }}</span><h3>{{ b['name'] }}</h3><p>{{ 'Achieved' if b['earned'] else 'Not unlocked yet' }}</p></div>{% endfor %}</div></section>
+{% elif tab=='messages' %}
+<div class="section-head"><div><span class="eyebrow">GIVING IS A CONVERSATION</span><h1>Your messages.</h1><p>Connect with nonprofits and business partners. Coordinate drop-offs and donations.</p></div></div>
+<div class="chat-layout section">
+  <aside class="chat-roster"><h2>Conversations</h2>
+    {% for peer in thread_peers %}
+    <a class="chat-contact {{ 'active' if selected_peer==peer['id'] else '' }}" href="{{ url_for('app.app_page',tab='messages',peer=peer['id']) }}">
+      <span class="creator-avatar">{{ peer['display_name'][:1]|upper }}</span><div><strong>{{ peer['display_name'] }}</strong><small>{{ peer['latest'] or ('Nonprofit' if peer['type']=='ong' else 'Business' if peer['type']=='empresa' else 'Supporter') }}</small></div>
+    </a>
+    {% else %}<p style="padding:15px">No contacts available yet.</p>{% endfor %}
+  </aside>
+  <section class="chat-conversation">
+    {% if selected_peer %}
+      {% set recipient=thread_peers|selectattr('id','equalto',selected_peer)|first %}
+      <div class="chat-head"><span class="creator-avatar">{{ recipient['display_name'][:1]|upper }}</span><div><strong>{{ recipient['display_name'] }}</strong><small>Coordinate your community impact</small></div></div>
+      <div class="chat-bubbles" id="chatBubbles">
+        {% for m in conversation %}
+          <div class="chat-row {{ 'mine' if m['sender_user_id']==user['id'] else '' }}"><div class="chat-bubble">{{ m['body'] }}</div><small>{{ m['created'][:16] }}</small></div>
+        {% else %}<p class="chat-intro">Say hello! Introduce yourself and explain how you'd like to help.</p>{% endfor %}
+      </div>
+      <form class="chat-compose" method="POST" action="{{ url_for('app.send_message') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="recipient_id" value="{{ selected_peer }}">
+        <textarea name="body" rows="1" maxlength="1000" required placeholder="Write a message…"></textarea><button type="submit" class="btn">Send ➤</button>
+      </form>
+    {% else %}<div class="social-empty"><h3>Start a conversation</h3><p>Follow a nonprofit to connect about its needs.</p></div>{% endif %}
+  </section>
+</div>
+{% elif tab=='profile' %}
+<div class="section-head"><div><span class="eyebrow">Your corner of Byfrost</span><h1>Account & profile.</h1><p>Update your information and choose how you appear in the giving community.</p></div></div><div class="card section" style="padding-bottom:24px"><div class="profile-splash {% for r in equipped if r['kind']=='accent' %}accent-{{ r['color'] }}{% endfor %}"></div><div class="profile-head"><span class="person-avatar {{ 'has-frame' if equipped|selectattr('kind','equalto','frame')|list else '' }}">{% if user['has_photo'] %}<img src="{{ url_for('app.avatar') }}" alt="Profile image">{% else %}{{ user['name'][:1]|upper }}{% endif %}</span><div class="titles"><h2>{{ user['name'] }}</h2><p>{{ user['email'] }}</p>{% for r in equipped if r['kind']=='title' %}<span class="badge">{{ r['symbol'] }} {{ r['name'] }}</span>{% endfor %}</div></div><div style="padding:20px 24px"><form id="photoForm" action="{{ url_for('app.update_photo') }}" method="POST" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="file" name="profile_photo" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden><button class="btn outline small" type="button" id="photoButton">Change photo 📷</button></form></div></div>
+<section class="section grid grid2"><div class="card card-pad"><h2>Account information</h2><div class="grid grid2" style="margin-top:18px">{% for label,field in [('Full name','name'),('Email','email'),('Country','country'),('State / Region','state'),('City','city'),('Postal code','postal_code'),('Address','address')] %}<div class="detail" data-scope="user" data-field="{{ field }}"><div class="detail-label">{{ label }}</div><div class="detail-line"><span class="detail-value">{{ user[field] or 'Not provided yet' }}</span><button class="edit-pencil" type="button" aria-label="Edit {{ label }}">✎</button></div><div class="editor" hidden></div></div>{% endfor %}</div><div class="flex wrap" style="margin-top:15px"><button class="btn outline small" id="lookupZip" type="button">⌖ Look up Brazilian ZIP</button><button class="btn outline small" id="useLocation" type="button">📍 Use my location</button></div><small>Suggested addresses must be reviewed before saving.</small></div><div class="card card-pad"><h2>Your social profile</h2><p class="text-sm" style="margin-top:7px">Tell other members what motivates you and control your public visibility.</p><form action="{{ url_for('app.update_social_profile') }}" method="POST" class="stack" style="margin-top:18px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Headline</label><input name="headline" maxlength="90" value="{{ user['headline'] or '' }}" placeholder="e.g. Food rescue volunteer"></div><div class="field"><label>About me</label><textarea name="bio" maxlength="600" placeholder="Share a little about yourself…">{{ user['bio'] or '' }}</textarea></div>{% if user['type']=='pessoa' %}<label class="check"><input type="checkbox" name="public_profile" {% if user['public_profile'] %}checked{% endif %}> Make my individual profile visible to other signed-in members</label><label class="check"><input type="checkbox" name="leaderboard_opt_in" {% if user['leaderboard_opt_in'] %}checked{% endif %}> Show me in public individual donation rankings</label>{% endif %}<button class="btn">Save social profile →</button></form>{% if user['type']=='pessoa' %}<a class="link" href="{{ url_for('app.person_page',person_id=user['id']) }}" style="display:inline-block;margin-top:14px">Preview my public profile ↗</a>{% endif %}</div></section>
+{% if org is defined and org and user['type'] in ('ong','empresa') %}<section class="section"><h2>{{ 'Nonprofit information' if user['type']=='ong' else 'Business information' }}</h2><div class="card card-pad grid grid3" style="margin-top:17px">{% set fields=[('Legal name','legal_name'),('Description','description'),('Tax ID','tax_id'),('Website','website'),('Phone','phone')] %}{% if user['type']=='ong' %}{% set fields=fields+[('Public name','public_name'),('Mission','mission'),('Cause','cause')] %}{% else %}{% set fields=fields+[('Trade name','trade_name'),('Sector','sector')] %}{% endif %}{% for label,field in fields %}<div class="detail" data-scope="organization" data-field="{{ field }}"><div class="detail-label">{{ label }}</div><div class="detail-line"><span class="detail-value">{{ org[field] or 'Not provided yet' }}</span><button class="edit-pencil" type="button" aria-label="Edit {{ label }}">✎</button></div><div class="editor" hidden></div></div>{% endfor %}</div></section>{% endif %}
+{% endif %}
+{% endif %}
+</div></main></div>
+{% if public_org is not defined or not public_org %}
+{% if user['type']=='ong' and tab=='workspace' %}
+<dialog class="modal" id="createRequest"><div class="modal-head"><div><span class="eyebrow">Nonprofit only</span><h2>Create a request in 3 steps</h2></div><button class="x" type="button" data-close>×</button></div><form id="requestWizard" action="{{ url_for('app.create_request') }}" method="POST" class="modal-body"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div id="wizardBars" class="flex" style="margin-bottom:16px"><span class="badge">1 · Need</span><span class="badge">2 · Handover</span><span class="badge">3 · Review</span></div><div data-step="0" class="stack"><h3>What does your organization need?</h3><div class="field"><label>Listing type</label><select name="kind"><option value="need">Request items</option><option value="giveaway">Offer items for people to collect</option></select></div><div class="field"><label>Title</label><input name="title" placeholder="e.g. 100 food baskets for local families" maxlength="140" required></div><div class="field"><label>Describe the need</label><textarea name="description" maxlength="1600" required></textarea></div><div class="form-grid"><div class="field"><label>Category</label><select name="category">{% for k in category_icons %}<option value="{{ k }}">{{ k|capitalize }}</option>{% endfor %}</select></div><div class="field"><label>Quantity</label><input type="number" min="1" max="100000" name="quantity" value="10" required></div></div><div class="field"><label>Unit</label><input name="unit" maxlength="30" value="items" required></div></div><div data-step="1" class="stack" hidden><h3>How can people help?</h3><label class="check"><input type="checkbox" name="allow_dropoff"> They can deliver to a collection point</label><label class="check"><input type="checkbox" name="allow_pickup"> Our team can collect from donors</label><label class="check"><input type="checkbox" name="allow_contact" checked> Contact us to coordinate</label><label class="check"><input type="checkbox" name="allow_claims"> Allow individuals to reserve giveaway items</label><div class="field"><label>Available collection points</label><div class="stack" style="max-height:160px;overflow:auto">{% for p in my_points if p['active'] %}<label class="check"><input type="checkbox" name="point_ids" value="{{ p['id'] }}"> {{ p['name'] }} — {{ p['city'] }}</label>{% else %}<small>No collection points created yet. Turn off drop-off, or add a point first.</small>{% endfor %}</div></div></div><div data-step="2" class="stack" hidden><h3>Ready to publish?</h3><p>People and businesses will see your listing. Only your nonprofit account can manage it. Confirm deliveries to update impact and unlock cosmetics.</p><div class="field"><label>Attach to a campaign (optional)</label><select name="campaign_id"><option value="">No campaign</option>{% for c in my_campaigns if c['status']=='open' %}<option value="{{ c['id'] }}">{{ c['title'] }}</option>{% endfor %}</select></div></div><div class="flex between" style="margin-top:20px"><button class="btn outline" type="button" id="wizardBack" hidden>← Back</button><span style="flex:1"></span><button class="btn" type="button" id="wizardNext">Continue →</button><button class="btn mint" type="submit" id="wizardSubmit" hidden>Publish request ✦</button></div></form></dialog>
+<dialog class="modal" id="createPoint"><div class="modal-head"><h2>Add a collection point</h2><button class="x" type="button" data-close>×</button></div><form class="modal-body form-grid" method="POST" action="{{ url_for('app.create_collection_point') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Location name</label><input name="name" maxlength="120" required placeholder="e.g. Community Centre"></div><div class="field"><label>Street address</label><input name="address" maxlength="250" required></div><div class="field"><label>City</label><input name="city" maxlength="100" required></div><div class="field"><label>State</label><input name="state" maxlength="100" required></div><div class="field"><label>Postal code</label><input name="postal_code" maxlength="20"></div><div class="field"><label>Latitude</label><input id="pointLat" name="latitude" type="number" step="any" min="-90" max="90" required></div><div class="field"><label>Longitude</label><input id="pointLng" name="longitude" type="number" step="any" min="-180" max="180" required></div><div class="field wide"><label>Handover instructions</label><textarea name="instructions" maxlength="600" placeholder="Opening hours, delivery contact, entrance…"></textarea></div><p class="wide text-sm">Tip: click on the map below to choose coordinates. Only publish locations authorized to receive items.</p><div id="pointPicker" class="map wide" style="height:230px"></div><button class="btn wide">Add collection point →</button></form></dialog>
+<dialog class="modal" id="createCampaign"><div class="modal-head"><h2>Launch a campaign</h2><button class="x" type="button" data-close>×</button></div><form method="POST" action="{{ url_for('app.create_campaign') }}" class="modal-body form-grid"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field wide"><label>Campaign name</label><input name="title" maxlength="140" required></div><div class="field wide"><label>What will this campaign achieve?</label><textarea name="description" maxlength="1600" required></textarea></div><div class="field"><label>Category</label><select name="category">{% for k in category_icons %}<option value="{{ k }}">{{ k|capitalize }}</option>{% endfor %}</select></div><div class="field"><label>Target quantity</label><input name="target_quantity" type="number" min="1" max="100000" required></div><div class="field"><label>Unit</label><input name="unit" value="items" required></div><label class="check wide"><input name="allow_money_demo" type="checkbox"> Allow financial donation demo (no money transferred)</label><button class="btn wide">Launch campaign →</button></form></dialog>
+{% endif %}{% endif %}
+<div id="toast" class="toast" role="status" hidden></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(()=>{'use strict';const $=(s,c=document)=>c.querySelector(s),$$=(s,c=document)=>Array.from(c.querySelectorAll(s));const csrf=$('meta[name="csrf-token"]')?.content||'';
+const toast=(message)=>{const t=$('#toast');t.textContent=message;t.hidden=false;clearTimeout(window._bfToast);window._bfToast=setTimeout(()=>t.hidden=true,3800)};
+$('#accountToggle')?.addEventListener('click',()=>{const m=$('#accountMenu');m.hidden=!m.hidden;$('#accountToggle').setAttribute('aria-expanded',String(!m.hidden))});document.addEventListener('click',e=>{const a=$('#accountMenu'),b=$('#accountToggle');if(a&&b&&!a.hidden&&!a.contains(e.target)&&!b.contains(e.target))a.hidden=true});$('#mobileNav')?.addEventListener('click',()=>$('#sidebar')?.classList.toggle('open'));
+$$('[data-open]').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.open);if(d?.showModal)d.showModal()}));$$('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog')?.close()));$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+const needSearch=$('#requestSearch'),category=$('#categoryFilter'),kind=$('#kindFilter');function filterRequests(){const q=(needSearch?.value||'').toLowerCase(),cat=category?.value||'',k=kind?.value||'',org=new URLSearchParams(location.search).get('org');let count=0;$$('.need-card').forEach(c=>{const visible=(!q||c.dataset.search.includes(q))&&(!cat||cat===c.dataset.category)&&(!k||k===c.dataset.kind)&&(!org||org===c.dataset.ngo);c.hidden=!visible;if(visible)count++});if($('#requestCount'))$('#requestCount').textContent=count;if($('#noMatches'))$('#noMatches').hidden=count>0}needSearch?.addEventListener('input',filterRequests);category?.addEventListener('change',filterRequests);kind?.addEventListener('change',filterRequests);if(needSearch)filterRequests();
+const orgSearch=$('#orgSearch'),orgFilter=$('#orgFilter');function filterOrgs(){const q=(orgSearch?.value||'').toLowerCase(),k=orgFilter?.value||'';let count=0;$$('.org-item').forEach(c=>{const visible=(!q||c.dataset.search.includes(q))&&(!k||k===c.dataset.kind);c.hidden=!visible;if(visible)count++});if($('#orgCount'))$('#orgCount').textContent=count;if($('#noOrgs'))$('#noOrgs').hidden=count>0}orgSearch?.addEventListener('input',filterOrgs);orgFilter?.addEventListener('change',filterOrgs);if(orgSearch)filterOrgs();
+const openRequest=new URLSearchParams(location.search).get('open_request');if(openRequest&&/^\d+$/.test(openRequest))document.getElementById('need-'+openRequest)?.showModal();if(new URLSearchParams(location.search).get('compose')==='request')$('#createRequest')?.showModal();
+const wizard=$('#requestWizard');if(wizard){let step=0;const sections=$$('[data-step]',wizard);function refresh(){sections.forEach((sec,i)=>sec.hidden=i!==step);$('#wizardBack').hidden=step===0;$('#wizardNext').hidden=step===2;$('#wizardSubmit').hidden=step!==2;$$('#wizardBars .badge').forEach((e,i)=>e.classList.toggle('green',i<=step))}$('#wizardNext').addEventListener('click',()=>{const bad=$$('input,textarea,select',sections[step]).find(el=>!el.checkValidity());if(bad){bad.reportValidity();return}if(step===1){const options=['allow_dropoff','allow_pickup','allow_contact','allow_claims'];if(!options.some(n=>wizard.elements[n]?.checked)){toast('Choose at least one handover method.');return}if(wizard.elements['allow_dropoff'].checked&&!$$('input[name="point_ids"]:checked',wizard).length){toast('Select a collection point or disable drop-off.');return}}step=Math.min(2,step+1);refresh()});$('#wizardBack').addEventListener('click',()=>{step=Math.max(0,step-1);refresh()});wizard.addEventListener('submit',e=>{for(let i=0;i<sections.length;i++){const bad=$$('input,textarea,select',sections[i]).find(el=>!el.checkValidity());if(bad){step=i;refresh();e.preventDefault();bad.reportValidity();return}}});refresh()}
+const points={{ map_points|default([])|tojson }};const mapTarget=new URLSearchParams(location.search).get('request');const visible=mapTarget?points.filter(p=>p.request_ids.includes(Number(mapTarget))):points;
+if($('#collectionMap')){if(typeof L==='undefined')$('#collectionMap').textContent='The interactive map could not load. Collection points are listed alongside it.';else{const map=L.map('collectionMap',{scrollWheelZoom:false}).setView([-14.235,-51.92],4);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);const markers=new Map(),coords=[];visible.forEach(p=>{const lat=Number(p.lat),lng=Number(p.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const el=document.createElement('div'),name=document.createElement('strong'),address=document.createElement('p'),instructions=document.createElement('small');name.textContent=p.name;address.textContent=p.address+' · '+p.city+' · '+p.ngo;instructions.textContent=p.instructions||'Confirm opening hours with the nonprofit.';el.append(name,address,instructions);const marker=L.marker([lat,lng]).addTo(map).bindPopup(el);markers.set(p.id,marker);coords.push([lat,lng])});if(coords.length)map.fitBounds(coords,{padding:[24,24],maxZoom:12});$$('[data-point]').forEach(b=>{if(mapTarget&&!visible.some(p=>p.id===Number(b.dataset.point)))b.hidden=true;b.addEventListener('click',()=>{const marker=markers.get(Number(b.dataset.point));if(marker){map.setView(marker.getLatLng(),14);marker.openPopup()}})});$('#locateMe')?.addEventListener('click',()=>navigator.geolocation?.getCurrentPosition(pos=>map.setView([pos.coords.latitude,pos.coords.longitude],12),()=>toast('Location is not available.'),{timeout:10000}))}}
+const pm=$('#pointPicker');if(pm&&typeof L!=='undefined'){const map=L.map(pm,{scrollWheelZoom:false}).setView([-14.235,-51.92],4);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);let marker;map.on('click',event=>{const {lat,lng}=event.latlng;$('#pointLat').value=lat.toFixed(6);$('#pointLng').value=lng.toFixed(6);if(marker)marker.setLatLng(event.latlng);else marker=L.marker(event.latlng).addTo(map)});$('#createPoint')?.addEventListener('toggle',()=>setTimeout(()=>map.invalidateSize(),130));$$('[data-open="createPoint"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>map.invalidateSize(),250)))}
+$$('.edit-pencil').forEach(button=>button.addEventListener('click',()=>{const card=button.closest('.detail'),slot=$('.editor',card),label=$('.detail-value',card);if(!slot.hidden)return;const input=document.createElement(['description','mission'].includes(card.dataset.field)?'textarea':'input');input.value=label.textContent.trim()==='Not provided yet'?'':label.textContent.trim();input.maxLength=['description','mission'].includes(card.dataset.field)?2000:255;if(card.dataset.field==='email')input.type='email';const actions=document.createElement('div');actions.className='flex';const save=document.createElement('button'),cancel=document.createElement('button');save.className='btn small';save.type='button';save.textContent='Save';cancel.className='btn outline small';cancel.type='button';cancel.textContent='Cancel';actions.append(save,cancel);slot.append(input,actions);slot.hidden=false;input.focus();cancel.addEventListener('click',()=>{slot.replaceChildren();slot.hidden=true});save.addEventListener('click',async()=>{save.disabled=true;try{const response=await fetch('{{ url_for('app.update_field') }}',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({scope:card.dataset.scope,field:card.dataset.field,value:input.value})});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||'Could not save your changes.');label.textContent=data.value||'Not provided yet';slot.replaceChildren();slot.hidden=true;toast('Saved successfully.')}catch(e){toast(e.message)}finally{save.disabled=false}})}));$('#photoButton')?.addEventListener('click',()=>$('#photoFile')?.click());$('#photoFile')?.addEventListener('change',()=>{const f=$('#photoFile').files?.[0];if(!f)return;if(f.size>2*1024*1024){toast('Choose an image under 2 MB.');return}$('#photoForm').submit()});
+function suggest(field,value){if(!value)return;const card=$$('.detail[data-scope="user"]').find(x=>x.dataset.field===field);if(!card)return;const button=$('.edit-pencil',card);if($('.editor',card).hidden)button?.click();const input=$('.editor input,.editor textarea',card);if(input)input.value=value;}
+$('#lookupZip')?.addEventListener('click',async()=>{const postal=$('.detail[data-field="postal_code"]');let value=$('.editor input',postal)?.value||$('.detail-value',postal)?.textContent||'';value=value.replace(/\D/g,'');if(value.length!==8){toast('Enter a valid Brazilian ZIP code in the Postal code field first.');return}try{const response=await fetch('https://viacep.com.br/ws/'+value+'/json/');if(!response.ok)throw Error();const data=await response.json();if(data.erro)throw Error();suggest('country','Brazil');suggest('state',data.uf);suggest('city',data.localidade);suggest('address',data.logradouro);toast('Location suggestions loaded. Review and save each field.')}catch{toast('Postal code lookup unavailable.')}});
+$('#useLocation')?.addEventListener('click',()=>{if(!navigator.geolocation){toast('Location unavailable.');return}if(!confirm('Share approximate coordinates with OpenStreetMap to suggest your address?'))return;navigator.geolocation.getCurrentPosition(async pos=>{try{const u='https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+encodeURIComponent(pos.coords.latitude)+'&lon='+encodeURIComponent(pos.coords.longitude);const response=await fetch(u);if(!response.ok)throw Error();const a=(await response.json()).address||{};suggest('country',a.country);suggest('state',a.state||a.region);suggest('city',a.city||a.town||a.village);suggest('postal_code',a.postcode);suggest('address',[a.road,a.house_number].filter(Boolean).join(', '));toast('Location suggestions loaded. Review and save each field.')}catch{toast('Address lookup unavailable.')}},()=>toast('Location permission denied or unavailable.'),{timeout:10000})});
+})();
+</script><nav class="mobile-dock" aria-label="Mobile navigation">
+  {% for slug,icon,label in [('home','⌂','Feed'),('explore','♡','Needs'),('organizations','◈','NGOs'),('messages','✉','Chat'),('profile','☺','Profile')] %}
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+  {% endfor %}
+</nav>
+<script>
+(() => {
+ 'use strict';
+ const csrf=document.querySelector('meta[name="csrf-token"]')?.content||'';
+ const changePost=async(id,action)=>{
+   try{
+     const response=await fetch('/app/social/posts/'+id+'/event',{
+       method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+       body:JSON.stringify({action})
+     });
+     if(!response.ok) throw Error('Please refresh and try again.');
+     return true;
+   }catch(e){alert(e.message);return false}
+ };
+ // Track a brief *visible* view, not hardware fingerprints or private browsing data.
+ if('IntersectionObserver' in window){
+   const observed=new WeakMap();
+   const observer=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting,intersectionRatio})=>{
+     if(isIntersecting && intersectionRatio>=0.6 && !document.hidden){
+       if(observed.has(target))return;
+       const timer=setTimeout(()=>{
+         if(!document.hidden && target.isConnected){changePost(target.dataset.observePost,'view');observer.unobserve(target)}
+       },1800);
+       observed.set(target,timer);
+     }else{
+       const timer=observed.get(target);
+       if(timer){clearTimeout(timer);observed.delete(target)}
+     }
+   }),{threshold:[0,.6,.9]});
+   document.querySelectorAll('[data-observe-post]').forEach(el=>observer.observe(el));
+ }
+ document.querySelectorAll('[data-post-save]').forEach(el=>el.addEventListener('click',async()=>{
+   const now=el.classList.contains('saved'),action=now?'unsave':'save';
+   if(await changePost(el.dataset.postSave,action)){
+     el.classList.toggle('saved',!now);el.textContent=now?'▢':'▣';
+   }
+ }));
+ document.querySelectorAll('[data-post-hide]').forEach(el=>el.addEventListener('click',async()=>{
+   if(await changePost(el.dataset.postHide,'hide'))el.closest('[data-observe-post]')?.remove();
+ }));
+ document.querySelectorAll('[data-focus-comment]').forEach(el=>el.addEventListener('click',()=>{
+   document.querySelector('#reply-'+el.dataset.focusComment+' input[name="body"]')?.focus();
+ }));
+ document.querySelectorAll('[data-share-post]').forEach(el=>el.addEventListener('click',async()=>{
+   const target=location.origin+'/app/?tab=community#post-'+el.dataset.sharePost;
+   try{await navigator.clipboard.writeText(target);el.textContent='✓';setTimeout(()=>el.textContent='↗',2000)}
+   catch{window.prompt('Copy post URL:',target)}
+ }));
+ document.querySelectorAll('.photo-upload input').forEach(el=>el.addEventListener('change',()=>{
+   const name=el.closest('.social-compose')?.querySelector('.compose-photo-name');
+   if(name)name.textContent=el.files?.[0]?.name||'';
+ }));
+ const chat=document.getElementById('chatBubbles');if(chat)chat.scrollTop=chat.scrollHeight;
+})();
+</script>
+<div id="bf-nav-loading" role="status" aria-live="polite" aria-label="Loading page" hidden>
+  <div class="bf-load-card">
+    <span class="bf-load-mark" aria-hidden="true">✦</span>
+    <span class="bf-load-title">Connecting people with good</span>
+    <span class="bf-load-sub">Opening your Byfrost page…</span>
+    <span class="bf-load-ring" aria-hidden="true"></span>
+    <span class="bf-load-track" aria-hidden="true"></span>
+  </div>
+</div>
+<script>
+/* BYFROST: progressive navigation animations — no fetch interception or router changes. */
+(() => {
+  'use strict';
+  const overlay = document.getElementById('bf-nav-loading');
+  let navigating = false;
+  const showLoading = () => {
+    if(!overlay || navigating) return;
+    navigating = true;
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden','false');
+    document.documentElement.classList.add('bf-is-leaving');
+  };
+  const resetLoading = () => {
+    navigating = false;
+    if(overlay){overlay.hidden = true;overlay.setAttribute('aria-hidden','true');}
+    document.documentElement.classList.remove('bf-is-leaving');
+  };
+  // Restores correctly after the Back button loads this page from browser cache.
+  window.addEventListener('pageshow',resetLoading);
+  window.addEventListener('pagehide',() => { if(overlay) overlay.hidden = true; });
+  document.addEventListener('click',(e) => {
+    const link=e.target.closest?.('a[href]');
+    if(!link || e.defaultPrevented || e.button!==0 || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+    if(link.hasAttribute('download') || link.getAttribute('target')==='_blank') return;
+    let to;
+    try{to=new URL(link.href,location.href)}catch{return}
+    if(to.origin!==location.origin || !/^https?:$/.test(to.protocol)) return;
+    // Never block simple anchors, links with JS action handlers, or same URL.
+    if(to.pathname===location.pathname && to.search===location.search) return;
+    showLoading();
+  },false);
+  document.addEventListener('submit',e => {
+    const form=e.target;
+    if(!(form instanceof HTMLFormElement) || e.defaultPrevented || form.target==='_blank')return;
+    // Other handlers can still cancel a wizard form in the same submit turn.
+    queueMicrotask(() => {if(!e.defaultPrevented && form.isConnected)showLoading();});
+  });
+  // Provide a gentle decoded-image transition without changing URLs or downloads.
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('.social-post .post-hero-image img, .profile-story img').forEach(img=>{
+      const surface=img.parentElement;
+      if(!surface || img.complete) return;
+      surface.classList.add('bf-image-loading');
+      const done=()=>{surface.classList.remove('bf-image-loading');surface.classList.add('bf-image-loaded');};
+      img.addEventListener('load',done,{once:true});
+      img.addEventListener('error',done,{once:true});
+    });
+  }
+})();
+</script>
+</body></html>
