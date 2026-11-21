@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel da ONG</title>
+</head>
+<body>
+
+    <h1>Bem-vinda ao Conecta Solidário!</h1>
+
+    <h2>Painel da ONG</h2>
+
+    <p>Olá, {{ ong_nome }}!</p>
+
+    <p>
+        Aqui você poderá cadastrar pedidos de doação
+        e acompanhar as ofertas recebidas.
+    </p>
+
+    <h3>Pedidos de doação</h3>
+
+    <p>Você ainda não possui pedidos cadastrados.</p>
+
+    <a href="{{ url_for('logout') }}">Sair da conta</a>
+
+</body>
+</html>
