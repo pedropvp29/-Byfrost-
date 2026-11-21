@@ -165,6 +165,38 @@ def create_request():
 
     return redirect(url_for("dashboard"))
 
+# Public Donation Requests
+@app.route("/requests")
+def public_requests():
+
+    connection = connect()
+
+    # Retrieve all donation requests
+    requests_list = connection.execute("""
+        SELECT
+            requests.id,
+            ngos.name AS ngo_name,
+            donation_types.name AS donation_type,
+            requests.description,
+            requests.quantity,
+            requests.priority,
+            requests.status
+        FROM requests
+        JOIN ngos
+        ON requests.ngo_id = ngos.id
+        JOIN donation_types
+        ON requests.type_id = donation_types.id
+        WHERE requests.status = 'Open'
+        ORDER BY requests.id DESC
+    """).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "public_requests.html",
+        requests=requests_list
+    )
+
 
 # Log Out
 @app.route("/logout")
