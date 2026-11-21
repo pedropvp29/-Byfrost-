@@ -12,7 +12,7 @@
 
     <h2>NGO Dashboard</h2>
 
-    <p>Hello, {{ ong_nome }}!</p>
+    <p>Hello, {{ ngo_name }}!</p>
 
     <a href="{{ url_for('logout') }}">Log Out</a>
 
@@ -26,15 +26,15 @@
         {% endfor %}
     {% endwith %}
 
-    <form action="{{ url_for('cadastrar_pedido') }}" method="POST">
+    <form action="{{ url_for('create_request') }}" method="POST">
 
         <label>Donation Type:</label>
-        <select name="tipo_id" required>
+        <select name="type_id" required>
             <option value="">Select a category</option>
 
-            {% for categoria in categorias %}
-                <option value="{{ categoria.id }}">
-                    {{ categoria.nome }}
+            {% for category in categories %}
+                <option value="{{ category.id }}">
+                    {{ category.name }}
                 </option>
             {% endfor %}
         </select>
@@ -44,7 +44,7 @@
         <label>Request Description:</label>
         <br>
         <textarea
-            name="descricao"
+            name="description"
             placeholder="Describe what your NGO needs..."
             required
         ></textarea>
@@ -54,7 +54,7 @@
         <label>Required Quantity:</label>
         <input
             type="number"
-            name="quantidade"
+            name="quantity"
             min="1"
             required
         >
@@ -62,7 +62,7 @@
         <br><br>
 
         <label>Priority:</label>
-        <select name="prioridade" required>
+        <select name="priority" required>
             <option value="">Select a priority</option>
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -79,16 +79,16 @@
 
     <h2>My Requests</h2>
 
-    {% if pedidos %}
+    {% if requests %}
 
-        {% for pedido in pedidos %}
+        {% for request in requests %}
 
-            <h3>{{ pedido.tipo }}</h3>
+            <h3>{{ request.type }}</h3>
 
-            <p>Description: {{ pedido.descricao }}</p>
-            <p>Quantity: {{ pedido.quantidade }}</p>
-            <p>Priority: {{ pedido.prioridade }}</p>
-            <p>Status: {{ pedido.status }}</p>
+            <p>Description: {{ request.description }}</p>
+            <p>Quantity: {{ request.quantity }}</p>
+            <p>Priority: {{ request.priority }}</p>
+            <p>Status: {{ request.status }}</p>
 
             <hr>
 
