@@ -3,7 +3,7 @@ import sqlite3
 
 # Connect to the database
 def connect():
-    connection = sqlite3.connect("doacoes.db")
+    connection = sqlite3.connect("donations.db")
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
@@ -15,75 +15,75 @@ def create_database():
 
     # NGO registration data
     connection.execute("""
-        CREATE TABLE IF NOT EXISTS ongs (
+        CREATE TABLE IF NOT EXISTS ngos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            endereco TEXT,
-            contato TEXT
+            name TEXT NOT NULL,
+            address TEXT,
+            contact TEXT
         )
     """)
 
     # NGO login credentials
     connection.execute("""
-        CREATE TABLE IF NOT EXISTS acessos_ong (
+        CREATE TABLE IF NOT EXISTS ngo_access (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ong_id INTEGER NOT NULL UNIQUE,
+            ngo_id INTEGER NOT NULL UNIQUE,
             email TEXT NOT NULL UNIQUE,
-            senha TEXT NOT NULL,
+            password TEXT NOT NULL,
 
-            FOREIGN KEY (ong_id) REFERENCES ongs(id)
+            FOREIGN KEY (ngo_id) REFERENCES ngos(id)
         )
     """)
 
     # Donation types
     connection.execute("""
-        CREATE TABLE IF NOT EXISTS tipos_doacao (
+        CREATE TABLE IF NOT EXISTS donation_types (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL UNIQUE
+            name TEXT NOT NULL UNIQUE
         )
     """)
 
     # Donation requests made by NGOs
     connection.execute("""
-        CREATE TABLE IF NOT EXISTS pedidos (
+        CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ong_id INTEGER NOT NULL,
-            tipo_id INTEGER NOT NULL,
-            descricao TEXT NOT NULL,
-            quantidade INTEGER NOT NULL,
-            prioridade TEXT NOT NULL,
-            status TEXT DEFAULT 'Aberto',
+            ngo_id INTEGER NOT NULL,
+            type_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            priority TEXT NOT NULL,
+            status TEXT DEFAULT 'Open',
 
-            FOREIGN KEY (ong_id) REFERENCES ongs(id),
-            FOREIGN KEY (tipo_id) REFERENCES tipos_doacao(id)
+            FOREIGN KEY (ngo_id) REFERENCES ngos(id),
+            FOREIGN KEY (type_id) REFERENCES donation_types(id)
         )
     """)
 
     # Initial donation categories
     donation_types = [
-        ("Alimentos",),
-        ("Roupas",),
-        ("Higiene",),
-        ("Material escolar",),
-        ("Medicamentos",)
+        ("Food",),
+        ("Clothing",),
+        ("Hygiene",),
+        ("School Supplies",),
+        ("Medicine",)
     ]
 
     connection.executemany(
-        "INSERT OR IGNORE INTO tipos_doacao (nome) VALUES (?)",
+        "INSERT OR IGNORE INTO donation_types (name) VALUES (?)",
         donation_types
     )
 
     # Donations offered by users
     connection.execute("""
-        CREATE TABLE IF NOT EXISTS doacoes (
+        CREATE TABLE IF NOT EXISTS donations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            pedido_id INTEGER NOT NULL,
-            nome_doador TEXT NOT NULL,
-            contato TEXT NOT NULL,
-            quantidade INTEGER NOT NULL,
-            status TEXT DEFAULT 'Pendente',
+            request_id INTEGER NOT NULL,
+            donor_name TEXT NOT NULL,
+            contact TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            status TEXT DEFAULT 'Pending',
 
-            FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
+            FOREIGN KEY (request_id) REFERENCES requests(id)
         )
     """)
 
