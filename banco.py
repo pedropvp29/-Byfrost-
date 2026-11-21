@@ -74,6 +74,20 @@ def criar_banco():
         tipos
     )
 
+    # Doações oferecidas pelos usuários
+    conexao.execute("""
+        CREATE TABLE IF NOT EXISTS doacoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pedido_id INTEGER NOT NULL,
+            nome_doador TEXT NOT NULL,
+            contato TEXT NOT NULL,
+            quantidade INTEGER NOT NULL,
+            status TEXT DEFAULT 'Pendente',
+
+            FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
+        )
+    """)
+
     conexao.commit()
     conexao.close()
 
