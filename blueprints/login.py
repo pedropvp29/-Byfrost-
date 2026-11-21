@@ -105,7 +105,8 @@ def login_page():
         else:
             flash("Invalid form action.", "error")
 
-    return redirect(url_for("login.login_page"))
+    # Keep the registration tab selected if account creation needs correction.
+    return redirect(url_for("login.login_page", mode="register" if action == "register" else "login"))
 
 
 @login_bp.route("/logout", methods=["POST"])

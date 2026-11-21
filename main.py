@@ -4,7 +4,7 @@ import os
 import sqlite3
 
 from dotenv import load_dotenv
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, abort, make_response
 from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from blueprints.app import app_bp, get_authenticated_user
@@ -464,11 +464,70 @@ app.register_blueprint(login_bp)
 app.register_blueprint(app_bp)
 
 
+def public_landing_content():
+    """Show only public organizational activity; avoid presenting demo donations as real impact."""
+    stats = {"organizations": 0, "requests": 0, "posts": 0}
+    with sqlite3.connect(app.config["DATABASE_PATH"]) as db:
+        db.row_factory = sqlite3.Row
+        stats["organizations"] = db.execute("""SELECT COUNT(*) FROM users
+            WHERE active=1 AND type IN ('ong','empresa')""").fetchone()[0]
+        stats["requests"] = db.execute("""SELECT COUNT(*) FROM requests r
+            JOIN users u ON u.id=r.ngo_user_id
+            WHERE r.kind='need' AND r.status='open' AND u.active=1 AND u.type='ong'""").fetchone()[0]
+        stats["posts"] = db.execute("""SELECT COUNT(*) FROM posts p
+            JOIN users u ON u.id=p.author_user_id
+            WHERE u.active=1 AND u.type IN ('ong','empresa')""").fetchone()[0]
+        featured_orgs = db.execute("""SELECT u.id,u.type,u.name,u.city,
+              COALESCE(NULLIF(n.public_name,''),NULLIF(co.trade_name,''),
+                NULLIF(n.legal_name,''),NULLIF(co.legal_name,''),u.name) AS display_name,
+              COALESCE(NULLIF(n.description,''),NULLIF(co.description,''),'') AS description,
+              COALESCE(NULLIF(n.cause,''),NULLIF(co.sector,''),'Community') AS focus,
+              (SELECT COUNT(*) FROM posts p WHERE p.author_user_id=u.id) AS post_count
+              FROM users u LEFT JOIN ngos n ON n.user_id=u.id
+              LEFT JOIN companies co ON co.user_id=u.id
+              WHERE u.active=1 AND u.type IN ('ong','empresa')
+              ORDER BY post_count DESC,u.id DESC LIMIT 6""").fetchall()
+        featured_post = db.execute("""SELECT p.id,p.body,p.tags,
+              COALESCE(NULLIF(n.public_name,''),NULLIF(co.trade_name,''),
+                NULLIF(n.legal_name,''),NULLIF(co.legal_name,''),u.name) AS author_name,
+              EXISTS(SELECT 1 FROM post_images pi WHERE pi.post_id=p.id) AS has_image,
+              r.title AS request_title
+              FROM posts p JOIN users u ON u.id=p.author_user_id
+              LEFT JOIN ngos n ON n.user_id=u.id
+              LEFT JOIN companies co ON co.user_id=u.id
+              LEFT JOIN requests r ON r.id=p.request_id AND r.status='open' AND r.kind='need'
+              WHERE u.active=1 AND u.type IN ('ong','empresa')
+              ORDER BY has_image DESC,p.id DESC LIMIT 1""").fetchone()
+    return {"public_stats": stats, "featured_orgs": featured_orgs, "featured_post": featured_post}
+
+
+@app.route("/public/post-image/<int:post_id>")
+def landing_post_image(post_id):
+    """Public feed preview only for active nonprofit/business posts, never personal posts."""
+    with sqlite3.connect(app.config["DATABASE_PATH"]) as db:
+        row = db.execute("""SELECT pi.image_data,pi.mime FROM post_images pi
+            JOIN posts p ON p.id=pi.post_id
+            JOIN users u ON u.id=p.author_user_id
+            WHERE pi.post_id=? AND u.active=1 AND u.type IN ('ong','empresa')""",
+            (post_id,)).fetchone()
+    if not row or row[1] not in ('image/jpeg','image/png','image/webp'):
+        abort(404)
+    response = make_response(row[0]); response.headers['Content-Type']=row[1]
+    response.headers['Cache-Control']='public,max-age=300'
+    return response
+
+
 @app.route("/")
 def landing_page():
     if get_authenticated_user() is not None:
         return redirect(url_for("app.app_page"))
-    return render_template("landing.html")
+    try:
+        context = public_landing_content()
+    except sqlite3.Error:
+        app.logger.exception('Could not retrieve landing page community preview')
+        context = {"public_stats": {"organizations": 0, "requests": 0, "posts": 0},
+                   "featured_orgs": [], "featured_post": None}
+    return render_template("landing.html", **context)
 
 
 @app.errorhandler(CSRFError)
