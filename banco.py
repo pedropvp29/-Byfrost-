@@ -13,19 +13,9 @@ def conectar():
 def criar_banco():
     conexao = conectar()
 
-    # Usuários que realizam as doações
+    # Cadastro das ONGs
     conexao.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            senha TEXT NOT NULL
-        )
-    """)
-
-    # Instituições que precisam de ajuda
-    conexao.execute("""
-        CREATE TABLE IF NOT EXISTS instituicoes (
+        CREATE TABLE IF NOT EXISTS ongs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             endereco TEXT,
@@ -33,41 +23,48 @@ def criar_banco():
         )
     """)
 
-    # Pedidos de doação das instituições
+    # Tipos de doação
     conexao.execute("""
-        CREATE TABLE IF NOT EXISTS necessidades (
+        CREATE TABLE IF NOT EXISTS tipos_doacao (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            instituicao_id INTEGER NOT NULL,
-            categoria TEXT NOT NULL,
+            nome TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    # Pedidos feitos pelas ONGs
+    conexao.execute("""
+        CREATE TABLE IF NOT EXISTS pedidos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ong_id INTEGER NOT NULL,
+            tipo_id INTEGER NOT NULL,
+            descricao TEXT NOT NULL,
             quantidade INTEGER NOT NULL,
-            quantidade_atendida INTEGER DEFAULT 0,
             prioridade TEXT NOT NULL,
-            FOREIGN KEY (instituicao_id)
-                REFERENCES instituicoes(id)
+            status TEXT DEFAULT 'Aberto',
+
+            FOREIGN KEY (ong_id) REFERENCES ongs(id),
+            FOREIGN KEY (tipo_id) REFERENCES tipos_doacao(id)
         )
     """)
 
-    # Doações relacionadas a um pedido específico
-    conexao.execute("""
-        CREATE TABLE IF NOT EXISTS doacoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER,
-            necessidade_id INTEGER NOT NULL,
-            quantidade INTEGER NOT NULL,
-            status TEXT DEFAULT 'Pendente',
+    # Categorias iniciais
+    tipos = [
+        ("Alimentos",),
+        ("Roupas",),
+        ("Higiene",),
+        ("Material escolar",),
+        ("Medicamentos",)
+    ]
 
-            FOREIGN KEY (usuario_id)
-                REFERENCES usuarios(id),
-
-            FOREIGN KEY (necessidade_id)
-                REFERENCES necessidades(id)
-        )
-    """)
+    conexao.executemany(
+        "INSERT OR IGNORE INTO tipos_doacao (nome) VALUES (?)",
+        tipos
+    )
 
     conexao.commit()
     conexao.close()
 
-    print("Banco de dados criado com sucesso!")
+    print("Banco criado com sucesso!")
 
 
 if __name__ == "__main__":
