@@ -1,36 +1,36 @@
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Painel da ONG - Conecta Solidário</title>
+    <title>NGO Dashboard - Conecta Solidário</title>
 </head>
 
 <body>
 
     <h1>Conecta Solidário</h1>
 
-    <h2>Painel da ONG</h2>
+    <h2>NGO Dashboard</h2>
 
-    <p>Olá, {{ ong_nome }}!</p>
+    <p>Hello, {{ ong_nome }}!</p>
 
-    <a href="{{ url_for('logout') }}">Sair da conta</a>
+    <a href="{{ url_for('logout') }}">Log Out</a>
 
     <hr>
 
-    <h2>Cadastrar pedido de doação</h2>
+    <h2>Create a Donation Request</h2>
 
-    {% with mensagens = get_flashed_messages() %}
-        {% for mensagem in mensagens %}
-            <p>{{ mensagem }}</p>
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
         {% endfor %}
     {% endwith %}
 
     <form action="{{ url_for('cadastrar_pedido') }}" method="POST">
 
-        <label>Tipo de doação:</label>
+        <label>Donation Type:</label>
         <select name="tipo_id" required>
-            <option value="">Selecione uma categoria</option>
+            <option value="">Select a category</option>
 
             {% for categoria in categorias %}
                 <option value="{{ categoria.id }}">
@@ -41,17 +41,17 @@
 
         <br><br>
 
-        <label>Descrição do pedido:</label>
+        <label>Request Description:</label>
         <br>
         <textarea
             name="descricao"
-            placeholder="Descreva o que sua ONG precisa..."
+            placeholder="Describe what your NGO needs..."
             required
         ></textarea>
 
         <br><br>
 
-        <label>Quantidade necessária:</label>
+        <label>Required Quantity:</label>
         <input
             type="number"
             name="quantidade"
@@ -61,23 +61,23 @@
 
         <br><br>
 
-        <label>Prioridade:</label>
+        <label>Priority:</label>
         <select name="prioridade" required>
-            <option value="">Selecione a prioridade</option>
-            <option value="Baixa">Baixa</option>
-            <option value="Média">Média</option>
-            <option value="Alta">Alta</option>
+            <option value="">Select a priority</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
         </select>
 
         <br><br>
 
-        <button type="submit">Cadastrar pedido</button>
+        <button type="submit">Create Request</button>
 
     </form>
 
     <hr>
 
-    <h2>Meus pedidos</h2>
+    <h2>My Requests</h2>
 
     {% if pedidos %}
 
@@ -85,9 +85,9 @@
 
             <h3>{{ pedido.tipo }}</h3>
 
-            <p>Descrição: {{ pedido.descricao }}</p>
-            <p>Quantidade: {{ pedido.quantidade }}</p>
-            <p>Prioridade: {{ pedido.prioridade }}</p>
+            <p>Description: {{ pedido.descricao }}</p>
+            <p>Quantity: {{ pedido.quantidade }}</p>
+            <p>Priority: {{ pedido.prioridade }}</p>
             <p>Status: {{ pedido.status }}</p>
 
             <hr>
@@ -96,7 +96,7 @@
 
     {% else %}
 
-        <p>Você ainda não possui pedidos cadastrados.</p>
+        <p>You haven't created any requests yet.</p>
 
     {% endif %}
 
