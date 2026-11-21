@@ -1,58 +1,58 @@
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from banco import conectar, criar_banco
+from banco import connect, create_database
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = "chave-secreta-trocar-depois"
+app.secret_key = "change-this-secret-key"
 
 
 # NGO Registration
-@app.route("/cadastro", methods=["GET", "POST"])
-def cadastro():
+@app.route("/register", methods=["GET", "POST"])
+def register():
 
     if request.method == "POST":
 
-        nome = request.form["nome"]
-        endereco = request.form["endereco"]
-        contato = request.form["contato"]
+        name = request.form["name"]
+        address = request.form["address"]
+        contact = request.form["contact"]
         email = request.form["email"]
-        senha = request.form["senha"]
+        password = request.form["password"]
 
-        conexao = conectar()
+        connection = connect()
 
         try:
             # Register the NGO
-            cursor = conexao.execute("""
-                INSERT INTO ongs (nome, endereco, contato)
+            cursor = connection.execute("""
+                INSERT INTO ngos (name, address, contact)
                 VALUES (?, ?, ?)
-            """, (nome, endereco, contato))
+            """, (name, address, contact))
 
             # Get the ID of the registered NGO
-            ong_id = cursor.lastrowid
+            ngo_id = cursor.lastrowid
 
             # Hash the password
-            senha_hash = generate_password_hash(senha)
+            password_hash = generate_password_hash(password)
 
             # Create the NGO login credentials
-            conexao.execute("""
-                INSERT INTO acessos_ong
-                (ong_id, email, senha)
+            connection.execute("""
+                INSERT INTO ngo_access
+                (ngo_id, email, password)
                 VALUES (?, ?, ?)
-            """, (ong_id, email, senha_hash))
+            """, (ngo_id, email, password_hash))
 
-            conexao.commit()
+            connection.commit()
 
             flash("NGO successfully registered!")
             return redirect(url_for("login"))
 
         except sqlite3.IntegrityError:
-            conexao.rollback()
+            connection.rollback()
             flash("This email is already registered.")
 
         finally:
-            conexao.close()
+            connection.close()
 
     return render_template("cadastro_ong.html")
 
@@ -64,27 +64,27 @@ def login():
     if request.method == "POST":
 
         email = request.form["email"]
-        senha = request.form["senha"]
+        password = request.form["password"]
 
-        conexao = conectar()
+        connection = connect()
 
-        ong = conexao.execute("""
-            SELECT acessos_ong.ong_id,
-                   acessos_ong.senha,
-                   ongs.nome
-            FROM acessos_ong
-            JOIN ongs ON acessos_ong.ong_id = ongs.id
-            WHERE acessos_ong.email = ?
+        ngo = connection.execute("""
+            SELECT ngo_access.ngo_id,
+                   ngo_access.password,
+                   ngos.name
+            FROM ngo_access
+            JOIN ngos ON ngo_access.ngo_id = ngos.id
+            WHERE ngo_access.email = ?
         """, (email,)).fetchone()
 
-        conexao.close()
+        connection.close()
 
-        if ong and check_password_hash(ong["senha"], senha):
+        if ngo and check_password_hash(ngo["password"], password):
 
-            session["ong_id"] = ong["ong_id"]
-            session["ong_nome"] = ong["nome"]
+            session["ngo_id"] = ngo["ngo_id"]
+            session["ngo_name"] = ngo["name"]
 
-            return redirect(url_for("painel"))
+            return redirect(url_for("dashboard"))
 
         flash("Incorrect email or password.")
 
@@ -92,78 +92,78 @@ def login():
 
 
 # NGO Dashboard
-@app.route("/painel")
-def painel():
+@app.route("/dashboard")
+def dashboard():
 
-    if "ong_id" not in session:
+    if "ngo_id" not in session:
         return redirect(url_for("login"))
 
-    conexao = conectar()
+    connection = connect()
 
     # Retrieve donation categories
-    categorias = conexao.execute("""
-        SELECT id, nome
-        FROM tipos_doacao
+    categories = connection.execute("""
+        SELECT id, name
+        FROM donation_types
     """).fetchall()
 
     # Retrieve requests from the logged-in NGO
-    pedidos = conexao.execute("""
+    requests_list = connection.execute("""
         SELECT
-            pedidos.id,
-            tipos_doacao.nome AS tipo,
-            pedidos.descricao,
-            pedidos.quantidade,
-            pedidos.prioridade,
-            pedidos.status
-        FROM pedidos
-        JOIN tipos_doacao
-        ON pedidos.tipo_id = tipos_doacao.id
-        WHERE pedidos.ong_id = ?
-        ORDER BY pedidos.id DESC
-    """, (session["ong_id"],)).fetchall()
+            requests.id,
+            donation_types.name AS type,
+            requests.description,
+            requests.quantity,
+            requests.priority,
+            requests.status
+        FROM requests
+        JOIN donation_types
+        ON requests.type_id = donation_types.id
+        WHERE requests.ngo_id = ?
+        ORDER BY requests.id DESC
+    """, (session["ngo_id"],)).fetchall()
 
-    conexao.close()
+    connection.close()
 
     return render_template(
         "painel_ong.html",
-        ong_nome=session["ong_nome"],
-        categorias=categorias,
-        pedidos=pedidos
+        ngo_name=session["ngo_name"],
+        categories=categories,
+        requests=requests_list
     )
 
 
 # Create a Donation Request
-@app.route("/cadastrar_pedido", methods=["POST"])
-def cadastrar_pedido():
+@app.route("/create_request", methods=["POST"])
+def create_request():
 
-    if "ong_id" not in session:
+    if "ngo_id" not in session:
         return redirect(url_for("login"))
 
-    tipo_id = request.form["tipo_id"]
-    descricao = request.form["descricao"]
-    quantidade = request.form["quantidade"]
-    prioridade = request.form["prioridade"]
+    type_id = request.form["type_id"]
+    description = request.form["description"]
+    quantity = request.form["quantity"]
+    priority = request.form["priority"]
 
-    conexao = conectar()
+    connection = connect()
 
-    conexao.execute("""
-        INSERT INTO pedidos
-        (ong_id, tipo_id, descricao, quantidade, prioridade)
+    connection.execute("""
+        INSERT INTO requests
+        (ngo_id, type_id, description, quantity, priority)
         VALUES (?, ?, ?, ?, ?)
     """, (
-        session["ong_id"],
-        tipo_id,
-        descricao,
-        quantidade,
-        prioridade
+        session["ngo_id"],
+        type_id,
+        description,
+        quantity,
+        priority
     ))
 
-    conexao.commit()
-    conexao.close()
+    connection.commit()
+    connection.close()
 
     flash("Donation request successfully created!")
 
-    return redirect(url_for("painel"))
+    return redirect(url_for("dashboard"))
 
 
 # Log Out
@@ -176,5 +176,6 @@ def logout():
 
 
 if __name__ == "__main__":
-    criar_banco()
+    create_database()
     app.run(debug=True)
+
