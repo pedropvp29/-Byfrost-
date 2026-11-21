@@ -13,7 +13,7 @@ def conectar():
 def criar_banco():
     conexao = conectar()
 
-    # Tabela de usuários
+    # Usuários que realizam as doações
     conexao.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +23,7 @@ def criar_banco():
         )
     """)
 
-    # Tabela de instituições
+    # Instituições que precisam de ajuda
     conexao.execute("""
         CREATE TABLE IF NOT EXISTS instituicoes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,30 +33,34 @@ def criar_banco():
         )
     """)
 
-    # Tabela de necessidades
+    # Pedidos de doação das instituições
     conexao.execute("""
         CREATE TABLE IF NOT EXISTS necessidades (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             instituicao_id INTEGER NOT NULL,
             categoria TEXT NOT NULL,
             quantidade INTEGER NOT NULL,
+            quantidade_atendida INTEGER DEFAULT 0,
             prioridade TEXT NOT NULL,
             FOREIGN KEY (instituicao_id)
                 REFERENCES instituicoes(id)
         )
     """)
 
-    # Tabela de doações
+    # Doações relacionadas a um pedido específico
     conexao.execute("""
         CREATE TABLE IF NOT EXISTS doacoes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario_id INTEGER,
-            categoria TEXT NOT NULL,
+            necessidade_id INTEGER NOT NULL,
             quantidade INTEGER NOT NULL,
-            destino TEXT,
             status TEXT DEFAULT 'Pendente',
+
             FOREIGN KEY (usuario_id)
-                REFERENCES usuarios(id)
+                REFERENCES usuarios(id),
+
+            FOREIGN KEY (necessidade_id)
+                REFERENCES necessidades(id)
         )
     """)
 
