@@ -36,9 +36,13 @@ def ensure_social_schema(database_path):
                 'edited_at': 'TEXT',
                 'deleted_at': 'TEXT',
             })
+            add_columns('users', {'profile_theme': "TEXT NOT NULL DEFAULT 'violet'"})
             add_columns('post_comments', {
                 'edited_at': 'TEXT',
                 'deleted_at': 'TEXT',
+                'media_data': 'BLOB',
+                'media_mime': 'TEXT',
+                'media_name': 'TEXT',
             })
             add_columns('messages', {
                 'read_at': 'TEXT',
@@ -75,6 +79,29 @@ def ensure_social_schema(database_path):
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                 FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
             )''')
+            db.execute('''CREATE TABLE IF NOT EXISTS message_media (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                message_id INTEGER NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+                position INTEGER NOT NULL,
+                image_data BLOB NOT NULL,
+                mime TEXT NOT NULL DEFAULT 'image/jpeg',
+                UNIQUE(message_id, position)
+            )''')
+            db.execute('''CREATE TABLE IF NOT EXISTS post_audio (
+                post_id INTEGER PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+                audio_data BLOB NOT NULL,
+                mime TEXT NOT NULL,
+                created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )''')
+            db.execute('''CREATE TABLE IF NOT EXISTS post_videos (
+                post_id INTEGER PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+                storage_key TEXT NOT NULL UNIQUE,
+                mime TEXT NOT NULL CHECK(mime IN ('video/mp4','video/webm')),
+                byte_size INTEGER NOT NULL,
+                created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )''')
+            db.execute('CREATE INDEX IF NOT EXISTS idx_post_comment_media ON post_comments(post_id,deleted_at)')
+            db.execute('CREATE INDEX IF NOT EXISTS idx_message_media ON message_media(message_id,position)')
             db.execute('CREATE INDEX IF NOT EXISTS idx_post_media ON post_media(post_id,position)')
             db.execute('CREATE INDEX IF NOT EXISTS idx_posts_expiry ON posts(post_type,expires_at)')
             db.execute('CREATE INDEX IF NOT EXISTS idx_posts_repost_of ON posts(repost_of_id)')

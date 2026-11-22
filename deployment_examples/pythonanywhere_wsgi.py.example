@@ -1,0 +1,10 @@
+"""EXEMPLO APENAS PARA NOVAS INSTALAÇÕES.
+Não sobrescreva o WSGI atual se já estiver funcionando.
+"""
+import os
+import sys
+PROJECT_DIR = '/home/Pedroteste/mysite'
+if PROJECT_DIR not in sys.path:
+    sys.path.insert(0, PROJECT_DIR)
+os.chdir(PROJECT_DIR)
+from flask_app import app as application

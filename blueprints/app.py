@@ -2,6 +2,9 @@
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
+from tempfile import SpooledTemporaryFile
+from zipfile import ZipFile, ZIP_STORED
+from shutil import copyfileobj
 import hashlib
 import hmac
 import re
@@ -10,14 +13,27 @@ import sqlite3
 
 from flask import (
     Blueprint, abort, current_app, flash, g, make_response, redirect,
-    render_template, request, session, url_for,
+    render_template, request, session, url_for, send_file,
 )
 from PIL import Image, ImageOps, UnidentifiedImageError
 from blueprints.recommend import ranked_feed, tags_for, add_affinity, POPULAR_TOPICS, CATEGORY_TOPIC
 from flask import jsonify
 from blueprints.social_upgrade import ensure_social_schema
+from blueprints.media import (
+    jpeg_photo, read_photos, read_authorized_audio,
+    read_comment_media, store_post_video, video_path, delete_post_video,
+    MAX_POST_PHOTOS, MAX_CHAT_PHOTOS, MAX_VIDEO_BYTES,
+)
 
 app_bp = Blueprint("app", __name__, url_prefix="/app")
+
+@app_bp.record_once
+def _configure_media_limit(state):
+    # Old deployments can still be configured at 3 MB in flask_app.py.
+    # Keep an explicit *finite* request cap; proxy/host may impose a smaller one.
+    state.app.config['MAX_CONTENT_LENGTH'] = max(
+        state.app.config.get('MAX_CONTENT_LENGTH') or 0, 160 * 1024 * 1024)
+
 AUTH_COOKIE = "bf_auth"
 DEVICE_COOKIE = "bf_device"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -50,7 +66,7 @@ def get_authenticated_user():
         db.row_factory = sqlite3.Row
         user = db.execute("""
             SELECT u.id, u.name, u.email, u.type, u.level, u.created,
-                   u.last_login, u.amount, t.fingerprint_hash
+                   u.last_login, u.amount, (u.profile IS NOT NULL) AS has_photo, t.fingerprint_hash
             FROM tokens AS t
             JOIN users AS u ON u.id = t.user_id
             WHERE t.user_id = ? AND t.token = ? AND t.active = 1
@@ -114,10 +130,13 @@ def require_authentication():
 def app_page():
     tab = request.args.get("tab", "home")
     focus_post = request.args.get('focus_post',type=int)
+    if tab == 'community':
+        tab = 'home'  # Backward-compatible alias for older shared links.
     story_id=request.args.get('story',type=int)
     feed_page=max(1,min(4,request.args.get('page',1,type=int)))
     # Explicit shared links should show a post even if the viewer does not follow its author.
-    feed_mode = 'for-you' if focus_post else ('following' if request.args.get('feed')=='following' else 'for-you')
+    requested_feed = request.args.get('feed','for-you')
+    feed_mode = 'for-you' if focus_post else (requested_feed if requested_feed in ('following','latest','saved') else 'for-you')
     if tab not in ("home", "explore", "map", "community", "impact", "profile", "workspace", "organizations", "messages", "leaderboard", "rewards", "people"):
         tab = "home"
     with closing(sqlite3.connect(current_app.config["DATABASE_PATH"])) as db:
@@ -125,7 +144,7 @@ def app_page():
         user = db.execute("""SELECT id, name, email, type, created, level, amount,
            country, state, city, postal_code, address, bio, headline,
            public_profile, leaderboard_opt_in, equipped_title_id, equipped_frame_id,
-           equipped_accent_id, profile IS NOT NULL AS has_photo
+           equipped_accent_id, profile_theme, profile IS NOT NULL AS has_photo
            FROM users WHERE id=?""", (g.user["id"],)).fetchone()
         org = None
         if user["type"] in ("ong", "empresa"):
@@ -241,6 +260,7 @@ def app_page():
         creators = db.execute("""SELECT u.id,u.name,u.type,u.headline,u.city,u.public_profile,
             COALESCE(n.public_name,n.legal_name,c.trade_name,c.legal_name,u.name) AS display_name,
             COALESCE(n.description,c.description,u.bio,'') AS description,
+            (u.profile IS NOT NULL) AS has_photo,
             COALESCE(n.verified,c.verified,0) AS verified,
             COALESCE((SELECT COUNT(*) FROM follows f WHERE f.followed_user_id=u.id),0) AS followers,
             EXISTS(SELECT 1 FROM follows f WHERE f.follower_user_id=? AND f.followed_user_id=u.id) AS following
@@ -253,6 +273,8 @@ def app_page():
         story_posts = db.execute("""SELECT p.id,p.author_user_id,p.body,p.created,p.expires_at,
             COALESCE(n.public_name,n.legal_name,c.trade_name,c.legal_name,u.name) AS display_name,
             EXISTS(SELECT 1 FROM post_media mm WHERE mm.post_id=p.id) AS has_multi,
+            EXISTS(SELECT 1 FROM post_audio au WHERE au.post_id=p.id) AS has_audio,
+            EXISTS(SELECT 1 FROM post_videos pv WHERE pv.post_id=p.id) AS has_video,
             EXISTS(SELECT 1 FROM post_images im WHERE im.post_id=p.id) AS has_legacy,
             u.type AS author_type
             FROM posts p JOIN users u ON u.id=p.author_user_id
@@ -269,8 +291,10 @@ def app_page():
                WHEN EXISTS(SELECT 1 FROM post_images im WHERE im.post_id=COALESCE(p.repost_of_id,p.id))
                THEN 1 ELSE 0 END AS photo_count,
             r.category AS request_category,r.status AS request_status,
-            u.city AS author_city,u.type,u.name,
+            u.city AS author_city,u.type,u.name,(u.profile IS NOT NULL) AS author_has_photo,
             (EXISTS(SELECT 1 FROM post_images im WHERE im.post_id=COALESCE(p.repost_of_id,p.id)) OR EXISTS(SELECT 1 FROM post_media mm WHERE mm.post_id=COALESCE(p.repost_of_id,p.id))) AS has_image,
+            EXISTS(SELECT 1 FROM post_audio au WHERE au.post_id=COALESCE(p.repost_of_id,p.id)) AS has_audio,
+            EXISTS(SELECT 1 FROM post_videos pv WHERE pv.post_id=COALESCE(p.repost_of_id,p.id)) AS has_video,
             COALESCE(p.repost_of_id,p.id) AS image_post_id,
             op.body AS original_body, ou.id AS original_author_id,ou.type AS original_author_type,
             COALESCE(n0.public_name,n0.legal_name,c0.trade_name,c0.legal_name,ou.name) AS original_author_name,
@@ -290,14 +314,15 @@ def app_page():
             LEFT JOIN users ou ON ou.id=op.author_user_id
             LEFT JOIN ngos n0 ON n0.user_id=ou.id
             LEFT JOIN companies c0 ON c0.user_id=ou.id
-            WHERE u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)
-              AND p.deleted_at IS NULL AND p.post_type='post'
+            WHERE u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)
+              AND p.deleted_at IS NULL AND COALESCE(p.post_type,'post')='post'
               AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP)
               AND (p.repost_of_id IS NULL OR (ou.active=1 AND op.deleted_at IS NULL
                 AND (op.expires_at IS NULL OR op.expires_at>CURRENT_TIMESTAMP)
                 AND (ou.type!='pessoa' OR ou.public_profile=1)))
-            ORDER BY (p.id=?) DESC,p.created DESC,p.id DESC LIMIT 1000""",(user['id'],user['id'],focus_post or -1)).fetchall()
-        comments = db.execute("""SELECT cm.*,u.name AS author_name,u.type AS author_type,
+            ORDER BY (p.id=?) DESC,p.created DESC,p.id DESC LIMIT 1000""",(user['id'],user['id'],user['id'],focus_post or -1)).fetchall()
+        comments = db.execute("""SELECT cm.id,cm.post_id,cm.user_id,cm.body,cm.created,cm.edited_at,cm.deleted_at,
+          (cm.media_data IS NOT NULL) AS has_media,u.name AS author_name,u.type AS author_type,
           CASE WHEN u.type='pessoa' AND u.public_profile=0 THEN 'Community member'
                ELSE COALESCE(n.public_name,c.trade_name,u.name) END AS display_name
           FROM post_comments cm JOIN users u ON u.id=cm.user_id
@@ -324,11 +349,25 @@ def app_page():
         # Rank at request time. We never store a hidden, opaque ranking per person.
         feed_raw = feed
         feed = ranked_feed(db, user, feed_raw, feed_mode,limit=60*feed_page)
+        feed_fallback = False
+        if not feed and feed_mode == 'following':
+            feed = ranked_feed(db, user, feed_raw, 'for-you', limit=60*feed_page)
+            feed_fallback = bool(feed)
         if focus_post and not any(item['id']==focus_post for item in feed):
             candidate=next((item for item in feed_raw if item['id']==focus_post),None)
             if candidate:
                 focused=ranked_feed(db,user,[candidate],'for-you')
-                if focused: feed=focused+feed[:44]
+                if not focused:
+                    # An explicit link is different from a recommendation: a post
+                    # hidden from the feed can still be opened intentionally.
+                    item=dict(candidate)
+                    item['topic_tags']=tags_for(item.get('body') or '',item.get('tags') or '',item.get('request_category'))
+                    item['saved']=bool(db.execute('SELECT 1 FROM post_saves WHERE user_id=? AND post_id=?',
+                        (user['id'],focus_post)).fetchone())
+                    item['why_recommended']='Opened from a direct link'
+                    item['is_new']=False
+                    focused=[item]
+                feed=focused+feed[:59]
         elif focus_post:
             index=next((i for i,item in enumerate(feed) if item['id']==focus_post),None)
             if index is not None: feed.insert(0,feed.pop(index))
@@ -347,6 +386,7 @@ def app_page():
         unread_total = db.execute("""SELECT COUNT(*) FROM messages
             WHERE recipient_user_id=? AND read_at IS NULL""",(user['id'],)).fetchone()[0]
         thread_peers = db.execute("""SELECT u.id,u.name,u.type,u.public_profile AS peer_public_profile,
+            (u.profile IS NOT NULL) AS has_photo,
             COALESCE(n.public_name,n.legal_name,c.trade_name,c.legal_name,u.name) AS display_name,
             (SELECT MAX(m.created) FROM messages m WHERE
                (m.sender_user_id=? AND m.recipient_user_id=u.id) OR
@@ -377,7 +417,9 @@ def app_page():
         conversation = db.execute("""SELECT m.id,m.sender_user_id,m.recipient_user_id,m.request_id,
                m.body,m.created,m.read_at,m.forwarded_from_id,m.shared_post_id,
                m.edited_at,m.deleted_at,
-               (m.image_data IS NOT NULL AND m.deleted_at IS NULL) AS has_image,u.name AS sender_name,
+               (m.image_data IS NOT NULL AND m.deleted_at IS NULL) AS has_image,
+                (SELECT COUNT(*) FROM message_media mm WHERE mm.message_id=m.id AND m.deleted_at IS NULL) AS image_count,
+                u.name AS sender_name,
                sp.body AS shared_post_body, (sp.id IS NOT NULL) AS shared_post_visible
             FROM messages m JOIN users u ON u.id=m.sender_user_id
             LEFT JOIN posts sp ON sp.id=m.shared_post_id AND sp.deleted_at IS NULL AND (sp.expires_at IS NULL OR sp.expires_at>CURRENT_TIMESTAMP)
@@ -409,12 +451,13 @@ def app_page():
         feed_mode=feed_mode, pinned_topics=pinned_topics, all_topics=POPULAR_TOPICS,
         personalization_enabled=personalization_enabled,
         thread_peers=thread_peers, selected_peer=selected_peer, conversation=conversation,
-        unread_total=unread_total, story_posts=story_posts, story_id=story_id, feed_page=feed_page, has_more_feed=len(feed)>=60*feed_page)
+        unread_total=unread_total, story_posts=story_posts, story_id=story_id, feed_page=feed_page,
+        feed_fallback=feed_fallback, has_more_feed=len(feed_raw)>60*feed_page)
 
 
 @app_bp.route('/posts/<int:post_id>',methods=['GET'])
 def view_post(post_id):
-    return redirect(url_for('app.app_page',tab='community',focus_post=post_id)+'#post-'+str(post_id))
+    return redirect(url_for('app.app_page',tab='home',focus_post=post_id)+'#post-'+str(post_id))
 
 
 @app_bp.route("/organizations/<int:organization_id>", methods=["GET"])
@@ -423,9 +466,11 @@ def organization_page(organization_id):
         db.row_factory = sqlite3.Row
         org = db.execute("""SELECT u.id,u.type,u.name,u.city,u.state,
             COALESCE(n.public_name,n.legal_name,co.trade_name,co.legal_name,u.name) AS display_name,
+            (u.profile IS NOT NULL) AS has_photo,
             CASE WHEN u.type='ong' THEN n.description ELSE co.description END AS description,
             CASE WHEN u.type='ong' THEN n.website ELSE co.website END AS website,
             CASE WHEN u.type='ong' THEN n.verified ELSE co.verified END AS verified,
+            u.profile_theme AS profile_theme,
             n.mission,n.cause,co.sector FROM users u
             LEFT JOIN ngos n ON n.user_id=u.id
             LEFT JOIN companies co ON co.user_id=u.id
@@ -435,13 +480,14 @@ def organization_page(organization_id):
         org_posts = db.execute("""SELECT p.id,p.body,p.created,p.tags,p.request_id,
             COALESCE(p.repost_of_id,p.id) AS image_post_id,
             (EXISTS(SELECT 1 FROM post_images pi WHERE pi.post_id=COALESCE(p.repost_of_id,p.id)) OR EXISTS(SELECT 1 FROM post_media pm WHERE pm.post_id=COALESCE(p.repost_of_id,p.id))) AS has_image,
+            EXISTS(SELECT 1 FROM post_videos pv WHERE pv.post_id=COALESCE(p.repost_of_id,p.id)) AS has_video,
             ou.name AS original_author_name
             FROM posts p LEFT JOIN posts op ON op.id=p.repost_of_id
             LEFT JOIN users ou ON ou.id=op.author_user_id
-            WHERE p.author_user_id=? AND p.deleted_at IS NULL AND p.post_type='post'
+            WHERE p.author_user_id=? AND p.deleted_at IS NULL AND COALESCE(p.post_type,'post')='post'
               AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND
               (p.repost_of_id IS NULL OR (ou.active=1 AND op.deleted_at IS NULL AND (op.expires_at IS NULL OR op.expires_at>CURRENT_TIMESTAMP) AND (ou.type!='pessoa' OR ou.public_profile=1)))
-            ORDER BY p.id DESC LIMIT 12""",
+            ORDER BY p.id DESC LIMIT 60""",
             (organization_id,)).fetchall()
         org_campaigns = db.execute("SELECT * FROM campaigns WHERE ngo_user_id=? AND status='open' ORDER BY id DESC",(organization_id,)).fetchall()
         org_offers = db.execute("SELECT * FROM offers WHERE donor_user_id=? AND status='available' ORDER BY id DESC",(organization_id,)).fetchall()
@@ -563,10 +609,10 @@ def update_photo():
         flash("Choose a profile photo.", "error")
         return redirect(url_for("app.app_page"))
     try:
-        raw = upload.read(2 * 1024 * 1024 + 1)
-        if len(raw) > 2 * 1024 * 1024:
+        raw = upload.read(18 * 1024 * 1024 + 1)
+        if len(raw) > 18 * 1024 * 1024:
             raise ValueError("Photo too large")
-        Image.MAX_IMAGE_PIXELS = 16_000_000
+        Image.MAX_IMAGE_PIXELS = 36_000_000
         with Image.open(BytesIO(raw)) as im:
             if im.format not in ("JPEG", "PNG", "WEBP"):
                 raise ValueError("Unsupported image format")
@@ -576,7 +622,7 @@ def update_photo():
             resized.save(out, format="JPEG", quality=85, optimize=True)
             image_data = out.getvalue()
     except (ValueError, OSError, UnidentifiedImageError, Image.DecompressionBombError):
-        flash("Upload a JPG, PNG, or WebP photo under 2 MB.", "error")
+        flash("Upload a JPG, PNG, or WebP profile photo under 18 MB.", "error")
         return redirect(url_for("app.app_page"))
     with closing(sqlite3.connect(current_app.config["DATABASE_PATH"])) as db:
         db.execute("UPDATE users SET profile=? WHERE id=?", (image_data, g.user["id"]))
@@ -768,26 +814,23 @@ def _post_expiry(post_type, duration):
 
 def _uploaded_post_photos():
     uploads = request.files.getlist('photos')
-    # Accept the old single-photo field as a backward-compatible fallback.
-    if not any(p and p.filename for p in uploads):
+    if not any(item and item.filename for item in uploads):
         uploads = request.files.getlist('photo')
-    uploads = [photo for photo in uploads if photo and photo.filename]
-    if len(uploads)>5: raise ValueError('You can upload up to 5 photos per publication.')
-    photos=[]
-    for upload in uploads:
-        photo=_normalized_chat_photo(upload)
-        if photo: photos.append(photo)
-    return photos
+    return read_photos(uploads, MAX_POST_PHOTOS)
 
 
 @app_bp.route('/posts/create', methods=['POST'])
 def create_post():
     require_role('ong','empresa','pessoa')
+    video = None
     try:
         body=request.form.get('body','').strip()
         if len(body)>1200: raise ValueError('Text must be under 1200 characters.')
         photos=_uploaded_post_photos()
-        if not body and not photos: raise ValueError('Write something or attach a photo.')
+        audio=read_authorized_audio(request.files.get('audio'))
+        video = None
+        if not body and not photos and not audio and not (request.files.get('video') and request.files['video'].filename):
+            raise ValueError('Write something or attach a photo or authorized audio.')
         raw_tags=request.form.get('tags','')[:200]
         post_type=request.form.get('post_type','post')
         expires_at=_post_expiry(post_type,request.form.get('duration','permanent'))
@@ -813,9 +856,18 @@ def create_post():
             for index,photo in enumerate(photos):
                 db.execute('INSERT INTO post_media(post_id,position,image_data,mime) VALUES (?,?,?,?)',
                            (cur.lastrowid,index,photo,'image/jpeg'))
+            if request.files.get('video') and request.files['video'].filename:
+                video = store_post_video(request.files['video'], current_app.config['DATABASE_PATH'])
+                db.execute('INSERT INTO post_videos(post_id,storage_key,mime,byte_size) VALUES (?,?,?,?)',
+                           (cur.lastrowid,video[0],video[1],video[2]))
+            if audio:
+                db.execute('INSERT INTO post_audio(post_id,audio_data,mime) VALUES(?,?,?)',
+                           (cur.lastrowid,audio[0],audio[1]))
             db.commit()
         flash('Story published!' if post_type=='story' else 'Your post was published.','success')
     except ValueError as exc:
+        if video:
+            delete_post_video(current_app.config['DATABASE_PATH'], video[0])
         return fail_and_back(exc,'community')
     return redirect(url_for('app.app_page',tab='community'))
 
@@ -1006,21 +1058,7 @@ def _ensure_can_message(db, recipient_id):
 
 
 def _normalized_chat_photo(upload):
-    if upload is None or not upload.filename:
-        return None
-    raw=upload.read(2_000_001)
-    if len(raw)>2_000_000:
-        raise ValueError('Choose a photo smaller than 2 MB.')
-    try:
-        with Image.open(BytesIO(raw)) as im:
-            if im.width*im.height>12_000_000:
-                raise ValueError('Photo is too large in dimensions.')
-            im=ImageOps.exif_transpose(im).convert('RGB')
-            im.thumbnail((1200,1200))
-            buff=BytesIO(); im.save(buff,'JPEG',quality=81,optimize=True)
-            return buff.getvalue()
-    except (UnidentifiedImageError,OSError,Image.DecompressionBombError) as error:
-        raise ValueError('Please upload a valid image (JPG, PNG or WebP).') from error
+    return jpeg_photo(upload)
 
 
 @app_bp.route('/messages/send', methods=['POST'])
@@ -1030,8 +1068,11 @@ def send_message():
         if not recipient_id or recipient_id<=0: raise ValueError('Choose a recipient.')
         body=request.form.get('body','').strip()
         if len(body)>1000: raise ValueError('Message must be under 1000 characters.')
-        photo=_normalized_chat_photo(request.files.get('photo'))
-        if not body and not photo: raise ValueError('Write a message or attach a photo.')
+        uploads=request.files.getlist('photos')
+        if not any(item and item.filename for item in uploads):
+            uploads=request.files.getlist('photo')
+        photos=read_photos(uploads, MAX_CHAT_PHOTOS)
+        if not body and not photos: raise ValueError('Write a message or attach a photo.')
         related=request.form.get('request_id','').strip()
         request_id=positive_int_value(related,'request') if related else None
         with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
@@ -1042,12 +1083,15 @@ def send_message():
                                 (request_id,)).fetchone()
                 if not item or item['ngo_user_id']!=recipient_id or not item['allow_contact']:
                     raise ValueError('Messaging is not available for this request.')
-            db.execute('''INSERT INTO messages(sender_user_id,recipient_user_id,request_id,body,image_data,image_mime)
+            cur=db.execute('''INSERT INTO messages(sender_user_id,recipient_user_id,request_id,body,image_data,image_mime)
                     VALUES (?,?,?,?,?,?)''',
-                    (g.user['id'],recipient_id,request_id,body,photo,'image/jpeg' if photo else None))
+                    (g.user['id'],recipient_id,request_id,body,None,None))
+            for position,photo in enumerate(photos):
+                db.execute('INSERT INTO message_media(message_id,position,image_data,mime) VALUES(?,?,?,?)',
+                           (cur.lastrowid,position,photo,'image/jpeg'))
             db.commit()
         if request.accept_mimetypes.best=='application/json':
-            return jsonify(ok=True,body=body,has_image=bool(photo),recipient_id=recipient_id)
+            return jsonify(ok=True,body=body,has_image=bool(photos),recipient_id=recipient_id)
         flash('Your message was sent.','success')
         return redirect(url_for('app.app_page',tab='messages',peer=recipient_id))
     except ValueError as error:
@@ -1080,11 +1124,14 @@ def forward_message(message_id):
                   (message_id,g.user['id'],g.user['id'])).fetchone()
             if not original: abort(404)
             _ensure_can_message(db,recipient_id)
-            db.execute('''INSERT INTO messages(sender_user_id,recipient_user_id,body,
+            new=db.execute('''INSERT INTO messages(sender_user_id,recipient_user_id,body,
                   forwarded_from_id,shared_post_id,image_data,image_mime)
                   VALUES(?,?,?,?,?,?,?)''',
                   (g.user['id'],recipient_id,original['body'],message_id,
                    original['shared_post_id'],original['image_data'],original['image_mime']))
+            db.execute('''INSERT INTO message_media(message_id,position,image_data,mime)
+                  SELECT ?,position,image_data,mime FROM message_media WHERE message_id=?''',
+                  (new.lastrowid,message_id))
             db.commit()
         flash('Forwarded privately.','success')
         return redirect(url_for('app.app_page',tab='messages',peer=recipient_id))
@@ -1304,7 +1351,7 @@ def person_page(person_id):
         db.row_factory=sqlite3.Row
         person=db.execute('''SELECT id,name,headline,bio,city,state,created,level,amount,
                  public_profile,leaderboard_opt_in,profile IS NOT NULL AS has_photo,
-                 equipped_title_id,equipped_frame_id,equipped_accent_id
+                 profile_theme,equipped_title_id,equipped_frame_id,equipped_accent_id
                  FROM users WHERE id=? AND type='pessoa' AND active=1''',(person_id,)).fetchone()
         if not person or (not person['public_profile'] and person_id != g.user['id']):
             abort(404)
@@ -1313,7 +1360,12 @@ def person_page(person_id):
         earned=db.execute('''SELECT r.*,n.public_name AS org_name FROM reward_unlocks x
               JOIN ngo_rewards r ON r.id=x.reward_id LEFT JOIN ngos n ON n.user_id=r.ngo_user_id
               WHERE x.user_id=? ORDER BY x.awarded DESC LIMIT 40''',(person_id,)).fetchall()
-        posts=db.execute("SELECT p.id,p.body,p.created,p.repost_of_id FROM posts p LEFT JOIN posts op ON op.id=p.repost_of_id WHERE p.author_user_id=? AND p.deleted_at IS NULL AND p.post_type='post' AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND (p.repost_of_id IS NULL OR (op.deleted_at IS NULL AND (op.expires_at IS NULL OR op.expires_at>CURRENT_TIMESTAMP))) ORDER BY p.id DESC LIMIT 70",(person_id,)).fetchall()
+        posts=db.execute("""SELECT p.id,p.body,p.created,p.repost_of_id,
+            COALESCE(p.repost_of_id,p.id) AS image_post_id,
+            (EXISTS(SELECT 1 FROM post_images pi WHERE pi.post_id=COALESCE(p.repost_of_id,p.id))
+            OR EXISTS(SELECT 1 FROM post_media pm WHERE pm.post_id=COALESCE(p.repost_of_id,p.id))) AS has_image,
+            EXISTS(SELECT 1 FROM post_videos pv WHERE pv.post_id=COALESCE(p.repost_of_id,p.id)) AS has_video
+            FROM posts p LEFT JOIN posts op ON op.id=p.repost_of_id WHERE p.author_user_id=? AND p.deleted_at IS NULL AND p.post_type='post' AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND (p.repost_of_id IS NULL OR (op.deleted_at IS NULL AND (op.expires_at IS NULL OR op.expires_at>CURRENT_TIMESTAMP) AND EXISTS (SELECT 1 FROM users original_owner WHERE original_owner.id=op.author_user_id AND original_owner.active=1 AND (original_owner.type!='pessoa' OR original_owner.public_profile=1 OR original_owner.id=?)))) ORDER BY p.id DESC LIMIT 70""",(person_id,g.user['id'])).fetchall()
         followers=db.execute('SELECT COUNT(*) FROM follows WHERE followed_user_id=?',(person_id,)).fetchone()[0]
         following=db.execute('SELECT 1 FROM follows WHERE follower_user_id=? AND followed_user_id=?',(g.user['id'],person_id)).fetchone() is not None
         equipped=db.execute('''SELECT r.id,r.name,r.kind,r.symbol,r.color FROM ngo_rewards r WHERE r.id IN (?,?,?)''',
@@ -1389,8 +1441,16 @@ def edit_post(post_id):
             legacy=db.execute('SELECT 1 FROM post_images WHERE post_id=?',(post_id,)).fetchone() is not None
             remove_all=request.form.get('remove_photos')=='on'
             remaining=0 if remove_all else media+int(legacy)
-            if remaining+len(photos)>5:raise ValueError('A post supports up to five photos.')
-            if not body and remaining+len(photos)==0:raise ValueError('Keep text or at least one photo.')
+            if remaining+len(photos)>MAX_POST_PHOTOS:raise ValueError('A post supports up to 15 photos.')
+            audio=read_authorized_audio(request.files.get('audio'))
+            existing_audio=db.execute('SELECT 1 FROM post_audio WHERE post_id=?',(post_id,)).fetchone() is not None
+            old_video=db.execute('SELECT storage_key FROM post_videos WHERE post_id=?',(post_id,)).fetchone()
+            remove_video=request.form.get('remove_video')=='on'
+            new_video_upload=request.files.get('video')
+            has_new_video=bool(new_video_upload and new_video_upload.filename)
+            remove_audio=request.form.get('remove_audio')=='on'
+            if not body and remaining+len(photos)==0 and not audio and (not existing_audio or remove_audio) and not has_new_video and (not old_video or remove_video):
+                raise ValueError('Keep text, a photo, video, or audio.')
             new_expiry=post['expires_at']
             if 'duration' in request.form and request.form.get('duration')!='keep':
                 new_expiry=_post_expiry(post['post_type'],request.form.get('duration','permanent'))
@@ -1405,15 +1465,33 @@ def edit_post(post_id):
                 old_picture=db.execute('SELECT image_data,mime FROM post_images WHERE post_id=?',(post_id,)).fetchone()
                 if old_picture:
                     db.execute('DELETE FROM post_images WHERE post_id=?',(post_id,))
-                    db.execute('UPDATE post_media SET position=position+10 WHERE post_id=?',(post_id,))
+                    db.execute('UPDATE post_media SET position=position+100 WHERE post_id=?',(post_id,))
                     db.execute('INSERT INTO post_media(post_id,position,image_data,mime) VALUES(?,?,?,?)',
                                (post_id,0,old_picture[0],old_picture[1]))
-                    db.execute('UPDATE post_media SET position=position-9 WHERE post_id=? AND position>=10',(post_id,))
+                    db.execute('UPDATE post_media SET position=position-99 WHERE post_id=? AND position>=100',(post_id,))
             for index,photo in enumerate(photos):
                 next_pos=db.execute('SELECT COALESCE(MAX(position),-1)+1 FROM post_media WHERE post_id=?',(post_id,)).fetchone()[0]
                 db.execute('INSERT INTO post_media(post_id,position,image_data,mime) VALUES (?,?,?,?)',
                            (post_id,next_pos,photo,'image/jpeg'))
-            db.commit()
+            if remove_audio or audio:
+                db.execute('DELETE FROM post_audio WHERE post_id=?',(post_id,))
+            if audio:
+                db.execute('INSERT INTO post_audio(post_id,audio_data,mime) VALUES (?,?,?)',(post_id,audio[0],audio[1]))
+            new_video=None
+            if has_new_video:
+                new_video=store_post_video(new_video_upload,current_app.config['DATABASE_PATH'])
+            if remove_video or new_video:
+                db.execute('DELETE FROM post_videos WHERE post_id=?',(post_id,))
+            if new_video:
+                db.execute('INSERT INTO post_videos(post_id,storage_key,mime,byte_size) VALUES (?,?,?,?)',
+                           (post_id,new_video[0],new_video[1],new_video[2]))
+            try:
+                db.commit()
+            except BaseException:
+                if new_video:delete_post_video(current_app.config['DATABASE_PATH'],new_video[0])
+                raise
+            if old_video and (remove_video or new_video):
+                delete_post_video(current_app.config['DATABASE_PATH'],old_video['storage_key'])
         flash('Publication updated.','success')
         return redirect(url_for('app.view_post',post_id=post_id))
     except ValueError as error:return fail_and_back(error,'community')
@@ -1428,7 +1506,11 @@ def delete_post(post_id):
         if not result.rowcount: abort(404)
         db.execute('DELETE FROM post_media WHERE post_id=?',(post_id,))
         db.execute('DELETE FROM post_images WHERE post_id=?',(post_id,))
+        db.execute('DELETE FROM post_audio WHERE post_id=?',(post_id,))
+        old_video=db.execute('SELECT storage_key FROM post_videos WHERE post_id=?',(post_id,)).fetchone()
+        db.execute('DELETE FROM post_videos WHERE post_id=?',(post_id,))
         db.commit()
+        if old_video:delete_post_video(current_app.config['DATABASE_PATH'],old_video[0])
     flash('Your publication was deleted.','success')
     return redirect(url_for('app.app_page',tab='community'))
 
@@ -1436,11 +1518,13 @@ def delete_post(post_id):
 @app_bp.route('/social/comments/<int:comment_id>/edit', methods=['POST'])
 def edit_comment(comment_id):
     body=request.form.get('body','').strip()
-    if not 1<=len(body)<=500:return fail_and_back('Comment must be 1–500 characters.','community')
+    if len(body)>500:return fail_and_back('Comment must be under 500 characters.','community')
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
-        cm=db.execute('SELECT post_id FROM post_comments WHERE id=? AND user_id=? AND deleted_at IS NULL',
+        cm=db.execute('SELECT post_id,media_data FROM post_comments WHERE id=? AND user_id=? AND deleted_at IS NULL',
                       (comment_id,g.user['id'])).fetchone()
         if not cm: abort(404)
+        if not body and cm[1] is None:
+            return fail_and_back('A comment needs text or an attachment.','community')
         db.execute('''UPDATE post_comments SET body=?,edited_at=CURRENT_TIMESTAMP
                       WHERE id=? AND user_id=?''',(body,comment_id,g.user['id']))
         db.commit()
@@ -1456,7 +1540,8 @@ def delete_comment(comment_id):
             (comment_id,)).fetchone()
         if not cm:abort(404)
         if g.user['id'] not in (cm['user_id'],cm['author_user_id']):abort(403)
-        db.execute('UPDATE post_comments SET deleted_at=CURRENT_TIMESTAMP WHERE id=?',(comment_id,))
+        db.execute('''UPDATE post_comments SET deleted_at=CURRENT_TIMESTAMP,
+                      media_data=NULL,media_mime=NULL,media_name=NULL WHERE id=?''',(comment_id,))
         db.commit()
     return redirect(url_for('app.view_post',post_id=cm['post_id']))
 
@@ -1470,7 +1555,8 @@ def edit_message(message_id):
         m=db.execute('''SELECT recipient_user_id,image_data,shared_post_id FROM messages
           WHERE id=? AND sender_user_id=? AND deleted_at IS NULL''',(message_id,g.user['id'])).fetchone()
         if not m:abort(404)
-        if not body and m['image_data'] is None and m['shared_post_id'] is None:
+        has_more=db.execute('SELECT 1 FROM message_media WHERE message_id=?',(message_id,)).fetchone() is not None
+        if not body and m['image_data'] is None and not has_more and m['shared_post_id'] is None:
             return fail_and_back('A message cannot be empty.','messages')
         db.execute('''UPDATE messages SET body=?,edited_at=CURRENT_TIMESTAMP
              WHERE id=? AND sender_user_id=?''',(body,message_id,g.user['id']))
@@ -1494,6 +1580,7 @@ def delete_message(message_id):
                  forwarded_from_id=NULL,shared_post_id=NULL,deleted_at=CURRENT_TIMESTAMP,
                  read_at=COALESCE(read_at,CURRENT_TIMESTAMP)
                  WHERE id=? AND deleted_at IS NULL''',(message_id,))
+            db.execute('DELETE FROM message_media WHERE message_id=?',(message_id,))
         else:
             db.execute('INSERT OR IGNORE INTO message_hidden(user_id,message_id) VALUES (?,?)',
                        (g.user['id'],message_id))
@@ -1505,7 +1592,7 @@ def delete_message(message_id):
 def like_post(post_id):
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
         visible=db.execute('''SELECT 1 FROM posts p JOIN users u ON u.id=p.author_user_id
-                 WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)''',(post_id,)).fetchone()
+                 WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)''',(post_id,g.user['id'])).fetchone()
         if not visible: abort(404)
         if db.execute('SELECT 1 FROM post_likes WHERE post_id=? AND user_id=?',(post_id,g.user['id'])).fetchone():
             db.execute('DELETE FROM post_likes WHERE post_id=? AND user_id=?',(post_id,g.user['id']))
@@ -1524,20 +1611,31 @@ def like_post(post_id):
 @app_bp.route('/social/posts/<int:post_id>/comment',methods=['POST'])
 def comment_post(post_id):
     body=request.form.get('body','').strip()
-    if not (1<=len(body)<=500): return fail_and_back('Comments must be 1–500 characters.','community')
+    try:
+        media=read_comment_media(request.files.get('media'))
+    except ValueError as error:
+        if request.accept_mimetypes.best == 'application/json':
+            return jsonify(ok=False,error=str(error)),400
+        return fail_and_back(error,'community')
+    if len(body)>500 or (not body and not media):
+        if request.accept_mimetypes.best == 'application/json':
+            return jsonify(ok=False,error='Write a comment or attach a photo/GIF.'),400
+        return fail_and_back('Write a comment or attach a photo/GIF.','community')
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
         visible=db.execute('''SELECT 1 FROM posts p JOIN users u ON u.id=p.author_user_id
-                 WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)''',(post_id,)).fetchone()
+                 WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)''',(post_id,g.user['id'])).fetchone()
         if not visible:abort(404)
         frequency=db.execute('''SELECT COUNT(*) FROM post_comments WHERE user_id=?
                         AND created>=datetime('now','-10 minutes')''',(g.user['id'],)).fetchone()[0]
         if frequency>=15:return fail_and_back('Please wait before commenting again.','community')
-        cur=db.execute('INSERT INTO post_comments(post_id,user_id,body) VALUES(?,?,?)',(post_id,g.user['id'],body))
+        cur=db.execute('INSERT INTO post_comments(post_id,user_id,body,media_data,media_mime,media_name) VALUES(?,?,?,?,?,?)',
+                       (post_id,g.user['id'],body,media[0] if media else None,media[1] if media else None,media[2] if media else None))
+        comment_created=db.execute('SELECT created FROM post_comments WHERE id=?',(cur.lastrowid,)).fetchone()[0]
         post=db.execute('SELECT body,tags FROM posts WHERE id=?',(post_id,)).fetchone()
         add_affinity(db,g.user['id'],tags_for(post[0],post[1]),2.0)
         db.commit()
     if request.accept_mimetypes.best=='application/json':
-        return jsonify(ok=True,comment_id=cur.lastrowid,body=body,author_name=g.user['name'])
+        return jsonify(ok=True,comment_id=cur.lastrowid,body=body,author_name=g.user['name'],created=comment_created,media_url=url_for('app.comment_media',comment_id=cur.lastrowid) if media else None)
     return redirect(url_for('app.app_page',tab='community')+'#post-'+str(post_id))
 
 
@@ -1595,15 +1693,111 @@ def equip_reward():
     return redirect(url_for('app.app_page',tab='rewards'))
 
 
+
+
+def _visible_media_post(db, post_id):
+    """Validate visibility of the post and (for reposts) its original."""
+    return db.execute("""SELECT p.*,COALESCE(p.repost_of_id,p.id) AS source_id,
+        u.name AS author_name,ou.name AS original_author_name
+      FROM posts p JOIN users u ON u.id=p.author_user_id
+      LEFT JOIN posts op ON op.id=p.repost_of_id
+      LEFT JOIN users ou ON ou.id=op.author_user_id
+      WHERE p.id=? AND p.deleted_at IS NULL
+        AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP)
+        AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)
+        AND (p.repost_of_id IS NULL OR (op.deleted_at IS NULL AND ou.active=1
+          AND (op.expires_at IS NULL OR op.expires_at>CURRENT_TIMESTAMP)
+          AND (ou.type!='pessoa' OR ou.public_profile=1 OR ou.id=?)))""",
+      (post_id,g.user['id'],g.user['id'])).fetchone()
+
+
+@app_bp.route('/social/comments/<int:comment_id>/media', methods=['GET'])
+def comment_media(comment_id):
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        db.row_factory=sqlite3.Row
+        row=db.execute("""SELECT post_id,media_data,media_mime FROM post_comments
+            WHERE id=? AND deleted_at IS NULL""",(comment_id,)).fetchone()
+        if row is None or row['media_data'] is None or not _visible_media_post(db,row['post_id']):
+            abort(404)
+    response=make_response(row['media_data'])
+    response.headers['Content-Type']=row['media_mime'] if row['media_mime'] in ('image/jpeg','image/gif') else 'application/octet-stream'
+    response.headers['X-Content-Type-Options']='nosniff'
+    response.headers['Cache-Control']='private,max-age=120'
+    return response
+
+
+@app_bp.route('/social/posts/<int:post_id>/video', methods=['GET'])
+def post_video(post_id):
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        db.row_factory=sqlite3.Row
+        post=_visible_media_post(db,post_id)
+        if post is None:abort(404)
+        video=db.execute('SELECT storage_key,mime FROM post_videos WHERE post_id=?',(post['source_id'],)).fetchone()
+        if video is None:abort(404)
+        try:path=video_path(current_app.config['DATABASE_PATH'],video['storage_key'])
+        except ValueError:abort(404)
+    if not path.is_file():abort(404)
+    response=send_file(path,mimetype=video['mime'],conditional=True)
+    response.headers['Cache-Control']='private,max-age=120'
+    response.headers['X-Content-Type-Options']='nosniff'
+    return response
+
+
+@app_bp.route('/social/posts/<int:post_id>/download', methods=['GET'])
+def download_post(post_id):
+    """Download post caption and visible media as one ZIP, with attribution."""
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        db.row_factory=sqlite3.Row
+        post=_visible_media_post(db,post_id)
+        if post is None:abort(404)
+        root=post['source_id']
+        original=db.execute("""SELECT p.body,u.name FROM posts p JOIN users u ON u.id=p.author_user_id
+             WHERE p.id=?""",(root,)).fetchone()
+        photos=db.execute('SELECT position,image_data,mime FROM post_media WHERE post_id=? ORDER BY position',(root,)).fetchall()
+        if not photos:
+            photos=db.execute('SELECT 0 AS position,image_data,mime FROM post_images WHERE post_id=?',(root,)).fetchall()
+        audio=db.execute('SELECT audio_data,mime FROM post_audio WHERE post_id=?',(root,)).fetchone()
+        video=db.execute('SELECT storage_key,mime FROM post_videos WHERE post_id=?',(root,)).fetchone()
+        tmp=SpooledTemporaryFile(max_size=4*1024*1024,mode='w+b')
+        try:
+            with ZipFile(tmp,'w',compression=ZIP_STORED) as archive:
+                credit=f"Byfrost post #{post_id}\nAuthor: {post['author_name']}\nPublished: {post['created']} UTC\n"
+                if original and root!=post_id:
+                    credit+=f"Original author: {original['name']}\nSource post: #{root}\n"
+                credit+=f"\nCaption:\n{post['body']}\n"
+                if original and root!=post_id:credit+=f"\nOriginal caption:\n{original['body']}\n"
+                archive.writestr('caption-and-credit.txt',credit)
+                for index,photo in enumerate(photos,1):
+                    archive.writestr(f'photo-{index:02d}.jpg',photo['image_data'])
+                if audio:
+                    ext={'audio/mpeg':'mp3','audio/ogg':'ogg','audio/wav':'wav','audio/mp4':'m4a'}.get(audio['mime'],'bin')
+                    archive.writestr('creator-audio.'+ext,audio['audio_data'])
+                if video:
+                    try:path=video_path(current_app.config['DATABASE_PATH'],video['storage_key'])
+                    except ValueError:abort(404)
+                    if path.is_file():
+                        with path.open('rb') as infile,archive.open('video.'+('mp4' if video['mime']=='video/mp4' else 'webm'),'w') as outfile:
+                            copyfileobj(infile,outfile,length=1024*1024)
+            tmp.seek(0)
+        except BaseException:
+            tmp.close()
+            raise
+    response=send_file(tmp,mimetype='application/zip',as_attachment=True,download_name=f'byfrost-post-{post_id}.zip')
+    response.call_on_close(tmp.close)
+    response.headers['Cache-Control']='private,no-store'
+    response.headers['X-Content-Type-Options']='nosniff'
+    return response
+
+
 @app_bp.route('/social/posts/<int:post_id>/photos/<int:position>', methods=['GET'])
 def post_gallery_image(post_id,position):
-    if not (0<=position<5): abort(404)
+    if not (0<=position<MAX_POST_PHOTOS): abort(404)
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
         db.row_factory=sqlite3.Row
         visible=db.execute("""SELECT p.id FROM posts p JOIN users u ON u.id=p.author_user_id
             WHERE p.id=? AND p.deleted_at IS NULL
               AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP)
-              AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)""",(post_id,)).fetchone()
+              AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)""",(post_id,g.user['id'])).fetchone()
         if not visible: abort(404)
         row=db.execute('SELECT image_data,mime FROM post_media WHERE post_id=? AND position=?',
                        (post_id,position)).fetchone()
@@ -1622,8 +1816,8 @@ def post_image(post_id):
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
         row=db.execute("""SELECT pi.image_data,pi.mime FROM post_images pi
           JOIN posts p ON p.id=pi.post_id JOIN users u ON u.id=p.author_user_id
-          WHERE pi.post_id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)""",
-          (post_id,)).fetchone()
+          WHERE pi.post_id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)""",
+          (post_id,g.user['id'])).fetchone()
     if not row: abort(404)
     response=make_response(row[0]); response.headers['Content-Type']=row[1]
     response.headers['Cache-Control']='private,max-age=600'
@@ -1638,7 +1832,7 @@ def post_event(post_id):
     with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
         db.row_factory=sqlite3.Row; db.execute('PRAGMA foreign_keys=ON')
         post=db.execute("""SELECT p.id,p.body,p.tags FROM posts p JOIN users u ON u.id=p.author_user_id
-          WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1)""",(post_id,)).fetchone()
+          WHERE p.id=? AND p.deleted_at IS NULL AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP) AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)""",(post_id,g.user['id'])).fetchone()
         if not post: abort(404)
         tags=tags_for(post['body'],post['tags'])
         uid=g.user['id']
@@ -1684,3 +1878,49 @@ def update_interests():
             flash('Your interests were saved.','success')
         db.commit()
     return redirect(url_for('app.app_page',tab='community'))
+
+
+@app_bp.route('/messages/<int:message_id>/photos/<int:position>', methods=['GET'])
+def message_gallery_photo(message_id, position):
+    # Private gallery: enforce participation and per-user deletion.
+    if not 0 <= position < MAX_CHAT_PHOTOS:
+        abort(404)
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        row=db.execute('''SELECT mm.image_data,mm.mime FROM message_media mm
+            JOIN messages m ON m.id=mm.message_id
+            WHERE m.id=? AND mm.position=? AND m.deleted_at IS NULL
+              AND (m.sender_user_id=? OR m.recipient_user_id=?)
+              AND NOT EXISTS(SELECT 1 FROM message_hidden h WHERE h.message_id=m.id AND h.user_id=?)''',
+            (message_id,position,g.user['id'],g.user['id'],g.user['id'])).fetchone()
+    if row is None: abort(404)
+    resp=make_response(row[0]);resp.headers['Content-Type']=row[1]
+    resp.headers['Cache-Control']='private, no-store'
+    resp.headers['X-Content-Type-Options']='nosniff'
+    return resp
+
+
+@app_bp.route('/social/posts/<int:post_id>/audio', methods=['GET'])
+def post_audio_file(post_id):
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        row=db.execute('''SELECT a.audio_data,a.mime FROM post_audio a
+            JOIN posts p ON p.id=a.post_id JOIN users u ON u.id=p.author_user_id
+            WHERE p.id=? AND p.deleted_at IS NULL
+              AND (p.expires_at IS NULL OR p.expires_at>CURRENT_TIMESTAMP)
+              AND u.active=1 AND (u.type!='pessoa' OR u.public_profile=1 OR u.id=?)''',
+            (post_id,g.user['id'])).fetchone()
+    if row is None:abort(404)
+    resp=make_response(row[0]);resp.headers['Content-Type']=row[1]
+    resp.headers['Cache-Control']='private, max-age=300'
+    resp.headers['X-Content-Type-Options']='nosniff'
+    return resp
+
+
+@app_bp.route('/profile/appearance', methods=['POST'])
+def update_appearance():
+    theme=request.form.get('theme','violet')
+    if theme not in ('violet','mint','coral','sky','gold'):abort(400)
+    with closing(sqlite3.connect(current_app.config['DATABASE_PATH'])) as db:
+        db.execute('UPDATE users SET profile_theme=? WHERE id=?',(theme,g.user['id']))
+        db.commit()
+    flash('Profile theme updated.','success')
+    return redirect(url_for('app.app_page',tab='profile'))

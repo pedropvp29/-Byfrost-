@@ -101,6 +101,7 @@ def ranked_feed(db, viewer, rows, mode='for-you', limit=60):
     for raw in rows:
         p=dict(raw)
         if p['id'] in hidden: continue
+        if mode=='saved' and p['id'] not in saved: continue
         if mode=='following' and p['author_user_id'] not in follows and p['author_user_id']!=uid:
             continue
         tags=tags_for(p.get('body',''),p.get('tags') or '',p.get('request_category'))
@@ -128,7 +129,7 @@ def ranked_feed(db, viewer, rows, mode='for-you', limit=60):
             'A cause near you' if nearby else 'Discover a cause')
         p['bucket']=0 if new_unseen else (1 if p['id'] not in seen else 2)
         ranking.append(p)
-    if mode=='following':
+    if mode in ('following','latest'):
         ranking.sort(key=lambda p:(p['created'],p['id']),reverse=True)
     else:
         ranking.sort(key=lambda p:(-p['bucket'],p['score'],p['id']),reverse=True)
