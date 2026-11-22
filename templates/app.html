@@ -18,6 +18,7 @@
 @media(max-width:850px){.app-shell{display:block}.sidebar{position:fixed;transform:translateX(-105%);transition:transform .25s;box-shadow:0 20px 60px #090b1b55;width:265px}.sidebar.open{transform:translateX(0)}.mobile-nav{display:inline-block}.main{padding:0 18px 50px}.hero{grid-template-columns:1fr}.hero-art{display:none}.topbar{height:67px}.need-map{grid-template-columns:1fr}}
 @media(max-width:600px){.hero{padding:29px 23px;min-height:240px}.hero h1{font-size:32px}.grid3,.grid4,.grid2,.form-grid{grid-template-columns:1fr}.content{padding-top:20px}.section-head{align-items:start}.section-head .btn{white-space:normal}.topbar .pill{display:none}.modal-body{padding:17px}.profile-head{gap:12px;padding-inline:12px}.profile-head .person-avatar{width:75px;height:75px}.request-card .inner{padding:15px}.top-filters select{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 <style>
 /* BYFROST SOCIAL V4 — original visual system: editorial light surfaces + vibrant cause highlights */
@@ -195,6 +196,36 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
 }
 
 </style>
+<style>
+/* V7 social interactions — no full-page loading mask */
+#bf-nav-loading{inset:auto 18px auto auto;top:13px;display:block;z-index:3000;width:min(260px,calc(100vw - 36px));background:transparent;backdrop-filter:none;pointer-events:none}
+#bf-nav-loading .bf-load-card{min-width:0;width:100%;padding:12px 18px;display:flex;flex-direction:row;gap:10px;border-radius:16px;box-shadow:0 10px 35px #31284a22}
+#bf-nav-loading .bf-load-mark,#bf-nav-loading .bf-load-sub,#bf-nav-loading .bf-load-track{display:none}
+#bf-nav-loading .bf-load-title{font-size:11px;line-height:1.4}
+#bf-nav-loading .bf-load-ring{width:18px;height:18px;flex-shrink:0}
+html.bf-is-leaving .content{opacity:1;transform:none}
+.bf-live-stories{background:#fff;border:1px solid var(--line);border-radius:19px;padding:14px 16px;margin-bottom:18px}
+.bf-section-inline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.bf-section-inline>strong{font-weight:900;font-size:14px}
+.bf-story-row{display:flex;gap:16px;overflow-x:auto;padding:4px 1px 8px}.bf-story-item{width:82px;flex:0 0 82px;text-align:center;display:grid;justify-items:center;gap:5px}
+.bf-story-item small{font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:84px}.bf-story-ring{width:65px;height:65px;background:linear-gradient(145deg,#8d6aff,#6fe9c2);padding:3px;border-radius:50%;display:grid;place-items:center;transition:transform .2s}
+.bf-story-ring img,.bf-story-ring>span{width:59px;height:59px;border-radius:50%;border:3px solid #fff;object-fit:cover;display:grid;place-items:center;background:#e7e1fc;color:#6a4ccc;font-weight:900;font-size:20px}
+.bf-story-item:hover .bf-story-ring{transform:scale(1.06)}.bf-story-empty{padding:10px 0;font-size:12px}
+.bf-compose-options{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}.bf-compose-options label{display:grid;gap:4px;font-size:11px;color:#6e6583;font-weight:800}.bf-compose-options select{border:1px solid var(--line);border-radius:11px;padding:9px 13px;color:#50446f;background:#fff}
+.social-post{position:relative}.bf-new-flag{position:absolute;right:13px;top:66px;z-index:4;background:linear-gradient(120deg,#8062eb,#40b89c);font:900 9px 'Plus Jakarta Sans',sans-serif;letter-spacing:.09em;color:#fff;border-radius:50px;padding:6px 9px;box-shadow:0 5px 16px #7565ce55}
+.bf-post-menu{position:relative}.bf-post-menu summary{list-style:none;border:0;background:none;color:#7b728e;font-size:21px;cursor:pointer;width:30px;text-align:center}.bf-post-menu summary::-webkit-details-marker{display:none}
+.bf-post-menu-actions{position:absolute;top:34px;right:0;width:160px;background:#fff;border:1px solid var(--line);border-radius:13px;z-index:8;box-shadow:0 16px 32px #33235a20;padding:6px}.bf-post-menu-actions button{width:100%;background:transparent;border:0;padding:9px 10px;text-align:left;color:#534b6d;font-size:12px}.bf-post-menu-actions button:hover{background:#f5f1ff;border-radius:9px}
+.bf-danger,.bf-danger-text{color:#b84366!important}.bf-photo-gallery{position:relative;background:#eeedf4;overflow:hidden}.bf-gallery-slide img{display:block;max-height:min(64vh,610px);width:100%;object-fit:contain;margin:0 auto}.bf-gallery-prev,.bf-gallery-next{position:absolute;top:50%;transform:translateY(-50%);border:0;width:37px;height:37px;border-radius:50%;background:#ffffffd9;color:#3e345f;font-size:28px;line-height:1}.bf-gallery-prev{left:12px}.bf-gallery-next{right:12px}.bf-gallery-count{position:absolute;top:11px;left:12px;color:white;background:#171628ad;border-radius:99px;padding:5px 10px;font-size:11px}
+.bf-photo-gallery .bf-gallery-slide[hidden]{display:none}.bf-heart-pop{position:fixed;z-index:5000;pointer-events:none;font-size:30px;color:#ef5a87;text-shadow:0 5px 25px #ed7eaa88;animation:bf-heart-flight 1s ease-out forwards}
+@keyframes bf-heart-flight{0%{opacity:1;transform:translateY(0) scale(.65)}45%{opacity:1;transform:translateY(-42px) scale(1.4)}100%{opacity:0;transform:translateY(-108px) scale(.9)}}
+.bf-older-posts{display:flex;width:100%;margin:16px 0 24px}.bf-comments-details{margin-top:10px;border-top:1px solid #f0eef7}.bf-comments-details>summary{cursor:pointer;color:#84719f;font-size:11px;font-weight:800;padding:7px 0;list-style:none}
+.bf-comments-list{max-height:360px;overflow:auto;padding-right:5px}.bf-comments-list .post-comment{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}.bf-comment-controls{position:relative;margin-left:auto;font-size:10px}.bf-comment-controls summary{cursor:pointer;color:#8b7d9e;list-style:none}.bf-comment-controls>form{margin:7px 0}.bf-edit-comment{display:flex;gap:5px}.bf-edit-comment input{min-width:80px;max-width:180px;padding:5px;border:1px solid var(--line);border-radius:7px}.bf-comment-controls button{border:0;background:#f5f2fc;padding:5px 9px;border-radius:7px;color:#6d53b8}
+.bf-msg-options{position:relative;margin-left:auto}.bf-msg-options summary{cursor:pointer;list-style:none;font-weight:bold;color:#867b9f}.bf-msg-dropdown{position:absolute;bottom:26px;right:0;width:150px;background:white;color:#4c4761;border:1px solid var(--line);box-shadow:0 13px 35px #241a3730;border-radius:12px;padding:5px;z-index:12}.bf-msg-dropdown button{border:0;background:transparent;text-align:left;width:100%;padding:8px;font-size:11px}.bf-msg-dropdown button:hover{background:#f1edfb;border-radius:7px}
+.bf-deleted-message{font-style:italic;color:#77718a;font-size:12px;padding:4px 0}.bf-chat-layout .chat-bubbles{overflow:visible;overflow-y:auto}
+.bf-profile-filter{display:flex;gap:5px;background:#f0eef7;border-radius:12px;padding:4px}.bf-profile-filter button{background:transparent;border:0;border-radius:9px;padding:7px 10px;color:#756e86;font-size:11px;font-weight:900}.bf-profile-filter button.active{background:#fff;color:#694ac8;box-shadow:0 5px 14px #2517480c}
+.bf-v7-dialog textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:12px;padding:12px}.bf-v7-dialog label.field{display:grid;gap:6px}.bf-story-viewer{width:min(420px,calc(100vw - 26px));max-height:90vh;border:0;background:#1d1831;color:#fff;border-radius:22px;padding:0;box-shadow:0 30px 90px #1311238f}.bf-story-viewer::backdrop{background:#101121cd;backdrop-filter:blur(6px)}.bf-story-content{padding:15px;display:grid;gap:13px}.bf-story-viewer-head{display:flex;gap:9px;align-items:center}.bf-story-viewer-head small{color:#c2bde0;flex:1}.bf-story-viewer-photo{width:100%;max-height:62vh;object-fit:contain;border-radius:14px}.bf-story-content p{color:#fff}.bf-story-viewer .x{background:#ffffff33;color:#fff}
+@media(max-width:620px){.bf-new-flag{top:60px;right:10px}.bf-story-row{gap:9px}.bf-comments-list{max-height:280px}.bf-profile-filter button{font-size:10px;padding:6px 7px}}
+@media(prefers-reduced-motion:reduce){.bf-heart-pop{animation:none;display:none}.bf-story-ring{transition:none}}
+</style>
 </head>
 <body>
 {% set category_icons={'food':'🥫','clothing':'👕','hygiene':'🧼','books':'📚','furniture':'🪑','electronics':'💻','other':'📦'} %}
@@ -204,13 +235,13 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
   <div class="nav-label">COMMUNITY</div>
   <nav class="nav">
     {% for slug,icon,label in [('home','⌂','Your feed'),('explore','♡','Find a cause'),('organizations','◈','Nonprofits & businesses'),('map','⌖','Donation map'),('messages','✉','Messages'),('community','✦','All stories')] %}
-    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}{% if slug=='messages' and unread_total|default(0) %}<small class="bf-nav-count">{{ unread_total }}</small>{% endif %}</a>
     {% endfor %}
   </nav>
   <div class="nav-label">YOUR IMPACT</div>
   <nav class="nav">
     {% for slug,icon,label in [('leaderboard','♛','Top supporters'),('rewards','✧','Rewards'),('impact','◉','My contributions'),('workspace','▤','My workspace'),('people','☺','People')] %}
-    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}{% if slug=='messages' and unread_total|default(0) %}<small class="bf-nav-count">{{ unread_total }}</small>{% endif %}</a>
     {% endfor %}
   </nav>
   <div class="side-blurb"><strong>✦ Good grows together.</strong><p>Every contribution connects someone with something they need.</p></div>
@@ -236,22 +267,23 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
 <section class="public-wrap bf-public-profile">
  <div class="profile-splash"></div><div class="profile-head"><div class="person-avatar">{% if public_person['has_photo'] %}<img src="{{ url_for('app.user_avatar',user_id=public_person['id']) }}" alt="Profile photo">{% else %}{{ public_person['name'][:1]|upper }}{% endif %}</div><div class="titles"><span class="eyebrow">Individual supporter</span><h1>{{ public_person['name'] }}</h1><p>{{ public_person['headline'] or 'Connecting kindness with action.' }}</p>{% for r in public_equipped if r['kind']=='title' %}<span class="badge">{{ r['symbol'] }} {{ r['name'] }}</span>{% endfor %}</div></div>
  <div class="section grid grid3"><div class="card card-pad"><small>Confirmed donations</small><h2>{{ person_stats['confirmed_count'] }}</h2></div><div class="card card-pad"><small>Items contributed</small><h2>{{ person_stats['units'] }}</h2></div><div class="card card-pad"><small>Community followers</small><h2>{{ public_followers }}</h2></div></div>
- <div class="grid grid2 section"><div class="card card-pad"><div class="section-head"><h2>About {{ public_person['name'] }}</h2>{% if public_person['id']!=user['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_person['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="person"><button class="btn small" type="submit">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_person['bio'] or 'This supporter has not written a bio yet.' }}</p><div class="sep"></div><span class="badge">Level {{ public_person['level'] }}</span> <span class="badge green">{{ public_person['city'] or 'Community-wide' }}</span></div>
+ <div class="grid grid2 section"><div class="card card-pad"><div class="section-head"><h2>About {{ public_person['name'] }}</h2>{% if public_person['id']!=user['id'] %}<a class="btn ghost small" href="{{ url_for('app.app_page',tab='messages',peer=public_person['id']) }}">✉ Message</a>{% endif %}{% if public_person['id']!=user['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_person['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="person"><button class="btn small" type="submit">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_person['bio'] or 'This supporter has not written a bio yet.' }}</p><div class="sep"></div><span class="badge">Level {{ public_person['level'] }}</span> <span class="badge green">{{ public_person['city'] or 'Community-wide' }}</span></div>
   <div class="card card-pad"><h2>Unlocked recognition</h2><div class="stack" style="margin-top:17px">{% for r in person_rewards %}<div class="flex"><span style="font-size:25px">{{ r['symbol'] }}</span><div><strong class="color-{{ r['color'] }}">{{ r['name'] }}</strong><div><small>From {{ r['org_name'] or 'a nonprofit' }} · {{ r['kind']|capitalize }}</small></div></div></div>{% else %}<p>No NGO rewards unlocked yet.</p>{% endfor %}</div></div></div>
- <section class="section"><h2>Community updates</h2><div class="grid grid2" style="margin-top:16px">{% for post in person_posts %}<div class="card card-pad"><p style="white-space:pre-wrap;color:var(--ink)">{{ post['body'] }}</p><small>{{ post['created'] }}</small></div>{% else %}<div class="empty">No updates shared yet.</div>{% endfor %}</div></section>
+ <section class="section bf-profile-timeline"><div class="bf-section-inline"><h2>Community updates</h2><div class="bf-profile-filter"><button class="active" data-profile-filter="original" type="button">Posts</button><button type="button" data-profile-filter="repost">Reposts</button><button data-profile-filter="all" type="button">All</button></div></div>
+ <div class="grid grid2" style="margin-top:16px">{% for post in person_posts %}<a class="card card-pad bf-profile-post" data-kind="{{ 'repost' if post['repost_of_id'] else 'original' }}" href="{{ url_for('app.view_post',post_id=post['id']) }}"><span class="badge">{{ '⟳ Repost' if post['repost_of_id'] else '✦ Post' }}</span><p style="white-space:pre-wrap;color:var(--ink)">{{ post['body']|truncate(180,True,'…') }}</p><small>{{ post['created'][:16] }} · Open to comment ↗</small></a>{% else %}<div class="empty">No updates shared yet.</div>{% endfor %}</div></section>
 </section>
 {% elif public_org is defined and public_org %}
 <section class="public-wrap bf-public-profile"><div class="profile-splash"></div><div class="profile-head"><div class="person-avatar">{{ '✦' if public_org['type']=='ong' else '◈' }}</div><div class="titles"><span class="eyebrow">{{ 'Nonprofit organization' if public_org['type']=='ong' else 'Business partner' }}</span><h1>{{ public_org['display_name'] }}</h1><p>{{ (public_org['city'] or '') ~ (' · ' if public_org['city'] and public_org['state'] else '') ~ (public_org['state'] or '') }}</p></div></div>
  <div class="section grid grid3"><div class="card card-pad"><small>Verified status</small><h3 style="margin-top:10px">{{ 'Verified ✓' if public_org['verified'] else 'Not verified' }}</h3></div><div class="card card-pad"><small>Confirmed contributions</small><h2>{{ org_stats['confirmed_count'] }}</h2></div><div class="card card-pad"><small>Community followers</small><h2>{{ public_followers }}</h2></div></div>
- <div class="section grid grid2"><div class="card card-pad"><div class="section-head"><h2>About this organization</h2>{% if user['id']!=public_org['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_org['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="organization"><button class="btn small">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_org['description'] or 'This organization has not shared its story yet.' }}</p>{% if public_org['type']=='ong' %}<div class="sep"></div><strong>Our mission</strong><p>{{ public_org['mission'] or 'More details coming soon.' }}</p><span class="badge">{{ public_org['cause'] or 'Community support' }}</span>{% else %}<div class="sep"></div><span class="badge">{{ public_org['sector'] or 'Business partner' }}</span>{% endif %}</div>
+ <div class="section grid grid2"><div class="card card-pad"><div class="section-head"><h2>About this organization</h2>{% if public_org['id']!=user['id'] %}<a class="btn ghost small" href="{{ url_for('app.app_page',tab='messages',peer=public_org['id']) }}">✉ Message</a>{% endif %}{% if user['id']!=public_org['id'] %}<form method="POST" action="{{ url_for('app.follow_account',target_id=public_org['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="organization"><button class="btn small">{{ 'Following ✓' if public_following else '+ Follow' }}</button></form>{% endif %}</div><p>{{ public_org['description'] or 'This organization has not shared its story yet.' }}</p>{% if public_org['type']=='ong' %}<div class="sep"></div><strong>Our mission</strong><p>{{ public_org['mission'] or 'More details coming soon.' }}</p><span class="badge">{{ public_org['cause'] or 'Community support' }}</span>{% else %}<div class="sep"></div><span class="badge">{{ public_org['sector'] or 'Business partner' }}</span>{% endif %}</div>
  <div class="card card-pad"><h2>Ways to participate</h2><p style="margin-top:10px">{{ 'Explore this nonprofit’s open campaigns and available community recognition.' if public_org['type']=='ong' else 'See the products and resources this business is making available.' }}</p><div class="stack" style="margin-top:18px">{% for r in org_rewards|default([]) %}<div class="flex" style="padding:9px 0"><span style="font-size:26px">{{ r['symbol'] }}</span><div><strong>{{ r['name'] }}</strong><div><small>Unlock after {{ r['min_confirmed'] }} confirmed donation(s)</small></div></div></div>{% endfor %}</div></div></div>
  <div class="section grid grid2"><div><h2>{{ 'Active campaigns' if public_org['type']=='ong' else 'Available offers' }}</h2><div class="stack" style="margin-top:14px">{% if public_org['type']=='ong' %}{% for c in org_campaigns %}<div class="card card-pad"><span class="badge green">{{ c['category']|capitalize }}</span><h3 style="margin:9px 0">{{ c['title'] }}</h3><p>{{ c['description'] }}</p><a class="link" href="{{ url_for('app.app_page',tab='explore',org=public_org['id']) }}">Explore needs →</a></div>{% else %}<div class="empty">No active campaigns yet.</div>{% endfor %}{% else %}{% for o in org_offers %}<div class="card card-pad"><h3>{{ o['title'] }}</h3><p>{{ o['description'] }}</p><small>{{ o['quantity'] }} {{ o['unit'] }}</small></div>{% else %}<div class="empty">No offers available yet.</div>{% endfor %}{% endif %}</div></div>
- <div><h2>Updates & stories</h2><p style="margin:7px 0 18px">Follow this organization to see its newest stories in your feed.</p>
+ <div class="bf-profile-timeline"><div class="bf-section-inline"><h2>Updates & reposts</h2><div class="bf-profile-filter"><button type="button" data-profile-filter="original" class="active">Posts</button><button type="button" data-profile-filter="repost">Reposts</button><button type="button" data-profile-filter="all">All</button></div></div><p style="margin:7px 0 18px">Open any publication to like, share or comment.</p>
 <div class="profile-story-grid">{% for p in org_posts %}
-<a class="profile-story" href="{{ url_for('app.app_page',tab='community') }}#post-{{ p['id'] }}">
-{% if p['has_image'] %}<img src="{{ url_for('app.post_image',post_id=p['id']) }}" loading="lazy" alt="Story photo">
+<a class="profile-story bf-profile-post" data-kind="{{ 'repost' if p['original_author_name'] else 'original' }}" href="{{ url_for('app.view_post',post_id=p['id']) }}">
+{% if p['has_image'] %}<img src="{{ url_for('app.post_gallery_image',post_id=p['image_post_id'],position=0) }}" loading="lazy" alt="Story photo">
 {% else %}<span class="profile-story-symbol">{{ '♡' if public_org['type']=='ong' else '✦' }}</span>{% endif %}
-<span class="profile-story-caption">{{ p['body']|truncate(78,True,'…') }}</span>
+<span class="profile-story-caption">{% if p['original_author_name'] %}⟳ {{ p['original_author_name'] }} · {% endif %}{{ p['body']|truncate(78,True,'…') }}</span>
 {% if p['request_id'] %}<span class="profile-story-cta">♡ Donation request</span>{% endif %}
 </a>{% else %}<div class="empty">No updates published yet.</div>{% endfor %}</div></div></div>
 </section>
@@ -279,16 +311,30 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
       <a class="story-bubble story-more" href="{{ url_for('app.app_page',tab='organizations') }}"><span class="story-ring"><span class="story-avatar">＋</span></span><small>Explore all</small></a>
     </div>
 
+    <section class="bf-live-stories" aria-label="Active temporary stories">
+      <div class="bf-section-inline"><strong>Stories</strong><small>Disappear when their timer ends · usually 24 hours</small></div>
+      <div class="bf-story-row">
+      {% for st in story_posts|default([]) %}
+      <a class="bf-story-item" href="{{ url_for('app.app_page',tab='community',story=st['id']) }}" title="{{ st['body']|truncate(85,True,'…') }}">
+        <span class="bf-story-ring">{% if st['has_multi'] or st['has_legacy'] %}<img loading="lazy" alt="Story from {{ st['display_name'] }}" src="{{ url_for('app.post_gallery_image',post_id=st['id'],position=0) }}">{% else %}<span>{{ st['display_name'][:1]|upper }}</span>{% endif %}</span>
+        <small>{{ st['display_name']|truncate(13,True,'…') }}</small>
+      </a>
+      {% else %}<p class="bf-story-empty">No active stories. Share one with your community!</p>{% endfor %}
+      </div>
+    </section>
+
     {% if user['type']!='pessoa' or user['public_profile'] %}
     <form class="social-compose" method="POST" action="{{ url_for('app.create_post') }}" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="compose-top"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><div><strong>Share something meaningful</strong><small>Small updates inspire big changes.</small></div></div>
-      <textarea name="body" required minlength="3" maxlength="1200" placeholder="What happened in your community today? Tell the story…"></textarea>
+      <textarea name="body" maxlength="1200" placeholder="Share an update or photo with your community…"></textarea>
       <div class="compose-extra">
         <input name="tags" type="text" maxlength="200" placeholder="Tags: food, education, community…" aria-label="Post topic tags">
         {% if user['type']=='ong' %}<select name="request_id" aria-label="Connect to a nonprofit request"><option value="">No request linked</option>{% for r in my_requests if r['status']=='open' %}<option value="{{ r['id'] }}">Support: {{ r['title']|truncate(30) }}</option>{% endfor %}</select>{% endif %}
       </div>
-      <div class="compose-footer"><label class="photo-upload">📷 <span>Add photo</span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish story ↗</button></div>
+      <div class="bf-compose-options"><label>Publish as <select name="post_type" class="bf-type-select"><option value="post">Feed post</option><option value="story">Temporary story</option></select></label>
+      <label>Visible for <select name="duration" class="bf-duration-select"><option value="permanent">Always (post only)</option><option value="12h">12 hours</option><option value="24h">24 hours</option><option value="3d">3 days</option><option value="7d">7 days</option><option value="30d">30 days</option></select></label></div>
+      <div class="compose-footer"><label class="photo-upload">📷 <span>Up to 5 photos</span><input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish ↗</button></div>
     </form>
     {% else %}
     <div class="social-compose muted-compose"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><p>Want to share your giving journey? <a class="link" href="{{ url_for('app.app_page',tab='profile') }}">Enable your public profile</a>.</p></div>
@@ -311,15 +357,28 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
     {% if feed %}
     {% for p in feed %}
     <article class="social-post" id="post-{{ p['id'] }}" data-observe-post="{{ p['id'] }}">
+      {% if p['is_new'] %}<span class="bf-new-flag" aria-label="New post">NEW</span>{% endif %}
+      <textarea class="bf-original-caption" hidden>{{ p['body'] }}</textarea>
+      <input type="hidden" class="bf-original-tags" value="{{ p['tags'] or '' }}">
       <header class="social-post-head">
         <a class="creator-avatar" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'][:1]|upper }}</a>
         <div class="creator-meta"><a class="creator-name" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'] }}</a>
           <div class="creator-sub">{{ 'Nonprofit' if p['type']=='ong' else 'Business partner' if p['type']=='empresa' else 'Community member' }} · {{ p['created'][:10] }}</div></div>
         <span class="creator-chip {{ 'ngo' if p['type']=='ong' else 'business' if p['type']=='empresa' else '' }}">{{ 'NGO' if p['type']=='ong' else 'Business' if p['type']=='empresa' else 'Member' }}</span>
-        <button class="post-menu-btn" data-post-hide="{{ p['id'] }}" title="Not interested in this post" aria-label="Not interested in this post">···</button>
+        <details class="bf-post-menu"><summary aria-label="Post options">···</summary><div class="bf-post-menu-actions">
+          {% if p['author_user_id']==user['id'] %}
+          <button type="button" data-edit-post="{{ p['id'] }}">✎ Edit post</button>
+          <form action="{{ url_for('app.delete_post',post_id=p['id']) }}" method="POST" onsubmit="return confirm('Delete this publication?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="bf-danger" type="submit">⊗ Delete post</button></form>
+          {% else %}<button type="button" data-post-hide="{{ p['id'] }}">⊘ Not interested</button>{% endif %}
+          </div></details>
       </header>
-      {% if p['has_image'] %}
-      <div class="post-hero-image"><img src="{{ url_for('app.post_image',post_id=p['id']) }}" alt="Photo shared in this community story" loading="lazy"></div>
+      {% if p['photo_count'] %}
+      <div class="bf-photo-gallery" data-gallery>
+       {% for index in range(p['photo_count']) %}<div class="bf-gallery-slide" {% if index>0 %}hidden{% endif %}>
+        <img src="{{ url_for('app.post_gallery_image',post_id=p['image_post_id'],position=index) }}" alt="Photo {{ index+1 }} of {{ p['photo_count'] }} shared by {{ p['display_name'] }}" loading="lazy">
+       </div>{% endfor %}
+       {% if p['photo_count']>1 %}<button type="button" class="bf-gallery-prev" data-gallery-move="-1" aria-label="Previous photo">‹</button><button type="button" class="bf-gallery-next" data-gallery-move="1" aria-label="Next photo">›</button><span class="bf-gallery-count">1 / {{ p['photo_count'] }}</span>{% endif %}
+      </div>
       {% else %}
       <div class="post-illustration illustration-{{ p['id']%5 }}"><div class="illustration-ring a"></div><div class="illustration-ring b"></div>
         <span class="illustration-mark">{{ {'food':'🥫','clothing':'👕','education':'📚','health':'🩺','animals':'🐾','housing':'⌂','environment':'🌱','technology':'💻','community':'♡'}.get(p['topic_tags']|first or 'community','✧') }}</span>
@@ -328,13 +387,18 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
       {% endif %}
       <div class="social-post-body">
         <div class="post-action-line">
-          <form action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
+          <form class="bf-like-form" action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
           <button class="icon-action" data-focus-comment="{{ p['id'] }}" title="Comment" aria-label="Comment">♧</button>
-          <button class="icon-action" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
+          <button class="icon-action" type="button" data-repost-url="{{ url_for('app.repost_post',post_id=p['id']) }}" data-post-name="{{ p['display_name']|e }}" title="Repost with credit" aria-label="Repost this story">⟳</button>
+          <button class="icon-action" type="button" data-send-post-url="{{ url_for('app.share_post_in_message',post_id=p['id']) }}" title="Send post in a message" aria-label="Send this post privately">✉</button>
+          <button class="icon-action" type="button" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
           <span class="spacer"></span><button class="icon-action {{ 'saved' if p['saved'] else '' }}" data-post-save="{{ p['id'] }}" title="Save post" aria-label="Save post">{{ '▣' if p['saved'] else '▢' }}</button>
         </div>
-        <div class="post-engagement"><strong>{{ p['likes'] }} likes</strong><span>{{ p['comments_count'] }} comments</span></div>
-        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }}</div>
+        <div class="post-engagement"><strong class="bf-likes-count">{{ p['likes'] }} likes</strong><span class="bf-comments-count">{{ p['comments_count'] }} comments</span><span>⟳ {{ p['repost_count'] }} reposts</span></div>
+        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }} {% if p['edited_at'] %}<small>(edited)</small>{% endif %}</div>
+        {% if p['original_author_id'] %}
+          <a class="bf-repost-source" href="{{ url_for('app.person_page',person_id=p['original_author_id']) if p['original_author_type']=='pessoa' else url_for('app.organization_page',organization_id=p['original_author_id']) }}"><span>⟳ Reposted from <strong>{{ p['original_author_name'] }}</strong></span><p>{{ p['original_body']|truncate(240,True,'…') }}</p><small>Original creator credited · Open profile ↗</small></a>
+        {% endif %}
         {% if p['topic_tags'] %}<div class="post-topics">{% for tag in p['topic_tags'] %}<span>#{{ tag }}</span>{% endfor %}</div>{% endif %}
         {% if p['request_id'] and p['request_status']=='open' %}
           {% set linked=needs|selectattr('id','equalto',p['request_id'])|first %}
@@ -343,11 +407,20 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
             <a href="{{ url_for('app.app_page',tab='explore',open_request=p['request_id']) }}" class="btn small">Help now ♡</a></div>
         {% elif p['type']=='ong' %}<a class="post-project-link" href="{{ url_for('app.organization_page',organization_id=p['author_user_id']) }}">♡ Explore this nonprofit's projects →</a>{% endif %}
         <div class="why-post">✧ {{ p['why_recommended'] }} <span>· Based on interests, follows & confirmed giving</span></div>
-        {% for cm in comments if cm['post_id']==p['id'] %}{% if loop.index<=2 %}<div class="post-comment"><strong>{{ cm['display_name'] }}</strong> {{ cm['body'] }}</div>{% endif %}{% endfor %}
-        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
+        <details class="bf-comments-details" open><summary>Comments · {{ p['comments_count'] }}</summary><div class="bf-comments-list">
+        {% for cm in comments if cm['post_id']==p['id'] %}
+        <div class="post-comment"><strong>{{ cm['display_name'] }}</strong><span>{{ cm['body'] }}</span>{% if cm['edited_at'] %}<small>(edited)</small>{% endif %}
+          {% if cm['user_id']==user['id'] or p['author_user_id']==user['id'] %}
+          <details class="bf-comment-controls"><summary>Options</summary>
+           {% if cm['user_id']==user['id'] %}<form action="{{ url_for('app.edit_comment',comment_id=cm['id']) }}" method="POST" class="bf-edit-comment"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input name="body" maxlength="500" required value="{{ cm['body'] }}"><button type="submit">Save</button></form>{% endif %}
+           <form action="{{ url_for('app.delete_comment',comment_id=cm['id']) }}" method="POST" onsubmit="return confirm('Delete comment?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="bf-danger-text">Delete comment</button></form>
+          </details>{% endif %}
+        </div>{% endfor %}</div></details>
+        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form bf-ajax-comment" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
       </div>
     </article>
     {% endfor %}
+    {% if has_more_feed|default(false) and feed_page|default(1)<4 %}<a class="bf-older-posts btn outline" href="{{ url_for('app.app_page',tab=tab,feed=feed_mode,page=feed_page+1) }}">See more posts · including previous updates ↓</a>{% endif %}
     {% else %}
     <div class="social-empty"><span>✦</span><h3>No stories here yet</h3><p>Explore new nonprofits or switch to For you to discover fresh causes.</p><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="btn">Explore stories</a></div>
     {% endif %}
@@ -381,7 +454,7 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
 {% elif tab in ('organizations','people') %}
 <div class="section-head"><div><span class="eyebrow">A community of changemakers</span><h1>{{ 'Meet the people' if tab=='people' else 'Meet the organizations' }}.</h1><p>{{ 'Supporters sharing their impact and building connections.' if tab=='people' else 'Discover nonprofits in need and businesses making a difference.' }}</p></div></div>
 <div class="card card-pad" style="margin:24px 0"><div class="top-filters"><input class="search" id="orgSearch" placeholder="Search names, causes, descriptions…"><select class="search" id="orgFilter">{% if tab=='people' %}<option value="pessoa">Individuals</option>{% else %}<option value="">All organizations</option><option value="ong">Nonprofits</option><option value="empresa">Businesses</option>{% endif %}</select></div><div class="flex between" style="margin-top:10px"><small><span id="orgCount">0</span> profiles available</small><small>Profiles are loaded from registered accounts</small></div></div>
-<div class="grid grid4" id="orgGrid">{% for o in creators if (tab=='people' and o['type']=='pessoa') or (tab=='organizations' and o['type']!='pessoa') %}<article class="card org-card org-item" data-kind="{{ o['type'] }}" data-search="{{ (o['display_name'] ~ ' ' ~ (o['description'] or '') ~ ' ' ~ (o['city'] or ''))|lower|e }}"><div class="org-banner {{ 'company' if o['type']=='empresa' }}"></div><div class="body"><span class="person-avatar">{% if o['type']=='pessoa' %}☺{% elif o['type']=='ong' %}✦{% else %}◈{% endif %}</span><span class="badge {{ 'green' if o['type']=='ong' else 'gold' if o['type']=='empresa' else '' }}">{{ 'Nonprofit' if o['type']=='ong' else 'Business' if o['type']=='empresa' else 'Individual' }}</span><h3>{{ o['display_name'] }}</h3><p>{{ (o['description'] or 'Connecting the community through giving.')|truncate(145) }}</p><div class="meta"><small>♡ {{ o['followers'] }} followers</small>{% if o['verified'] %}<span class="badge green">Verified</span>{% endif %}</div><a class="btn outline small full" href="{{ url_for('app.person_page',person_id=o['id']) if o['type']=='pessoa' else url_for('app.organization_page',organization_id=o['id']) }}">View profile →</a></div></article>{% else %}<div class="empty">No public profiles yet. Individuals can enable theirs in Account settings.</div>{% endfor %}</div><div class="empty" id="noOrgs" hidden>No profiles match your search.</div>
+<div class="grid grid4" id="orgGrid">{% for o in creators if (tab=='people' and o['type']=='pessoa') or (tab=='organizations' and o['type']!='pessoa') %}<article class="card org-card org-item" data-kind="{{ o['type'] }}" data-search="{{ (o['display_name'] ~ ' ' ~ (o['description'] or '') ~ ' ' ~ (o['city'] or ''))|lower|e }}"><div class="org-banner {{ 'company' if o['type']=='empresa' }}"></div><div class="body"><span class="person-avatar">{% if o['type']=='pessoa' %}☺{% elif o['type']=='ong' %}✦{% else %}◈{% endif %}</span><span class="badge {{ 'green' if o['type']=='ong' else 'gold' if o['type']=='empresa' else '' }}">{{ 'Nonprofit' if o['type']=='ong' else 'Business' if o['type']=='empresa' else 'Individual' }}</span><h3>{{ o['display_name'] }}</h3><p>{{ (o['description'] or 'Connecting the community through giving.')|truncate(145) }}</p><div class="meta"><small>♡ {{ o['followers'] }} followers</small>{% if o['verified'] %}<span class="badge green">Verified</span>{% endif %}</div><a class="btn outline small full" href="{{ url_for('app.person_page',person_id=o['id']) if o['type']=='pessoa' else url_for('app.organization_page',organization_id=o['id']) }}">View profile →</a>{% if o['id']!=user['id'] %}<a class="btn ghost small full" href="{{ url_for('app.app_page',tab='messages',peer=o['id']) }}">✉ Send message</a>{% endif %}</div></article>{% else %}<div class="empty">No public profiles yet. Individuals can enable theirs in Account settings.</div>{% endfor %}</div><div class="empty" id="noOrgs" hidden>No profiles match your search.</div>
 {% elif tab=='community' %}
 <div class="social-layout">
   <div class="social-stream">
@@ -405,16 +478,30 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
       <a class="story-bubble story-more" href="{{ url_for('app.app_page',tab='organizations') }}"><span class="story-ring"><span class="story-avatar">＋</span></span><small>Explore all</small></a>
     </div>
 
+    <section class="bf-live-stories" aria-label="Active temporary stories">
+      <div class="bf-section-inline"><strong>Stories</strong><small>Disappear when their timer ends · usually 24 hours</small></div>
+      <div class="bf-story-row">
+      {% for st in story_posts|default([]) %}
+      <a class="bf-story-item" href="{{ url_for('app.app_page',tab='community',story=st['id']) }}" title="{{ st['body']|truncate(85,True,'…') }}">
+        <span class="bf-story-ring">{% if st['has_multi'] or st['has_legacy'] %}<img loading="lazy" alt="Story from {{ st['display_name'] }}" src="{{ url_for('app.post_gallery_image',post_id=st['id'],position=0) }}">{% else %}<span>{{ st['display_name'][:1]|upper }}</span>{% endif %}</span>
+        <small>{{ st['display_name']|truncate(13,True,'…') }}</small>
+      </a>
+      {% else %}<p class="bf-story-empty">No active stories. Share one with your community!</p>{% endfor %}
+      </div>
+    </section>
+
     {% if user['type']!='pessoa' or user['public_profile'] %}
     <form class="social-compose" method="POST" action="{{ url_for('app.create_post') }}" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="compose-top"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><div><strong>Share something meaningful</strong><small>Small updates inspire big changes.</small></div></div>
-      <textarea name="body" required minlength="3" maxlength="1200" placeholder="What happened in your community today? Tell the story…"></textarea>
+      <textarea name="body" maxlength="1200" placeholder="Share an update or photo with your community…"></textarea>
       <div class="compose-extra">
         <input name="tags" type="text" maxlength="200" placeholder="Tags: food, education, community…" aria-label="Post topic tags">
         {% if user['type']=='ong' %}<select name="request_id" aria-label="Connect to a nonprofit request"><option value="">No request linked</option>{% for r in my_requests if r['status']=='open' %}<option value="{{ r['id'] }}">Support: {{ r['title']|truncate(30) }}</option>{% endfor %}</select>{% endif %}
       </div>
-      <div class="compose-footer"><label class="photo-upload">📷 <span>Add photo</span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish story ↗</button></div>
+      <div class="bf-compose-options"><label>Publish as <select name="post_type" class="bf-type-select"><option value="post">Feed post</option><option value="story">Temporary story</option></select></label>
+      <label>Visible for <select name="duration" class="bf-duration-select"><option value="permanent">Always (post only)</option><option value="12h">12 hours</option><option value="24h">24 hours</option><option value="3d">3 days</option><option value="7d">7 days</option><option value="30d">30 days</option></select></label></div>
+      <div class="compose-footer"><label class="photo-upload">📷 <span>Up to 5 photos</span><input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple hidden></label><span class="compose-photo-name" aria-live="polite"></span><button type="submit" class="btn">Publish ↗</button></div>
     </form>
     {% else %}
     <div class="social-compose muted-compose"><span class="mini-circle">{{ user['name'][:1]|upper }}</span><p>Want to share your giving journey? <a class="link" href="{{ url_for('app.app_page',tab='profile') }}">Enable your public profile</a>.</p></div>
@@ -437,15 +524,28 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
     {% if feed %}
     {% for p in feed %}
     <article class="social-post" id="post-{{ p['id'] }}" data-observe-post="{{ p['id'] }}">
+      {% if p['is_new'] %}<span class="bf-new-flag" aria-label="New post">NEW</span>{% endif %}
+      <textarea class="bf-original-caption" hidden>{{ p['body'] }}</textarea>
+      <input type="hidden" class="bf-original-tags" value="{{ p['tags'] or '' }}">
       <header class="social-post-head">
         <a class="creator-avatar" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'][:1]|upper }}</a>
         <div class="creator-meta"><a class="creator-name" href="{{ url_for('app.person_page',person_id=p['author_user_id']) if p['type']=='pessoa' else url_for('app.organization_page',organization_id=p['author_user_id']) }}">{{ p['display_name'] }}</a>
           <div class="creator-sub">{{ 'Nonprofit' if p['type']=='ong' else 'Business partner' if p['type']=='empresa' else 'Community member' }} · {{ p['created'][:10] }}</div></div>
         <span class="creator-chip {{ 'ngo' if p['type']=='ong' else 'business' if p['type']=='empresa' else '' }}">{{ 'NGO' if p['type']=='ong' else 'Business' if p['type']=='empresa' else 'Member' }}</span>
-        <button class="post-menu-btn" data-post-hide="{{ p['id'] }}" title="Not interested in this post" aria-label="Not interested in this post">···</button>
+        <details class="bf-post-menu"><summary aria-label="Post options">···</summary><div class="bf-post-menu-actions">
+          {% if p['author_user_id']==user['id'] %}
+          <button type="button" data-edit-post="{{ p['id'] }}">✎ Edit post</button>
+          <form action="{{ url_for('app.delete_post',post_id=p['id']) }}" method="POST" onsubmit="return confirm('Delete this publication?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="bf-danger" type="submit">⊗ Delete post</button></form>
+          {% else %}<button type="button" data-post-hide="{{ p['id'] }}">⊘ Not interested</button>{% endif %}
+          </div></details>
       </header>
-      {% if p['has_image'] %}
-      <div class="post-hero-image"><img src="{{ url_for('app.post_image',post_id=p['id']) }}" alt="Photo shared in this community story" loading="lazy"></div>
+      {% if p['photo_count'] %}
+      <div class="bf-photo-gallery" data-gallery>
+       {% for index in range(p['photo_count']) %}<div class="bf-gallery-slide" {% if index>0 %}hidden{% endif %}>
+        <img src="{{ url_for('app.post_gallery_image',post_id=p['image_post_id'],position=index) }}" alt="Photo {{ index+1 }} of {{ p['photo_count'] }} shared by {{ p['display_name'] }}" loading="lazy">
+       </div>{% endfor %}
+       {% if p['photo_count']>1 %}<button type="button" class="bf-gallery-prev" data-gallery-move="-1" aria-label="Previous photo">‹</button><button type="button" class="bf-gallery-next" data-gallery-move="1" aria-label="Next photo">›</button><span class="bf-gallery-count">1 / {{ p['photo_count'] }}</span>{% endif %}
+      </div>
       {% else %}
       <div class="post-illustration illustration-{{ p['id']%5 }}"><div class="illustration-ring a"></div><div class="illustration-ring b"></div>
         <span class="illustration-mark">{{ {'food':'🥫','clothing':'👕','education':'📚','health':'🩺','animals':'🐾','housing':'⌂','environment':'🌱','technology':'💻','community':'♡'}.get(p['topic_tags']|first or 'community','✧') }}</span>
@@ -454,13 +554,18 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
       {% endif %}
       <div class="social-post-body">
         <div class="post-action-line">
-          <form action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
+          <form class="bf-like-form" action="{{ url_for('app.like_post',post_id=p['id']) }}" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="icon-action {{ 'liked' if p['liked'] else '' }}" title="Like post" aria-label="Like post">{{ '♥' if p['liked'] else '♡' }}</button></form>
           <button class="icon-action" data-focus-comment="{{ p['id'] }}" title="Comment" aria-label="Comment">♧</button>
-          <button class="icon-action" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
+          <button class="icon-action" type="button" data-repost-url="{{ url_for('app.repost_post',post_id=p['id']) }}" data-post-name="{{ p['display_name']|e }}" title="Repost with credit" aria-label="Repost this story">⟳</button>
+          <button class="icon-action" type="button" data-send-post-url="{{ url_for('app.share_post_in_message',post_id=p['id']) }}" title="Send post in a message" aria-label="Send this post privately">✉</button>
+          <button class="icon-action" type="button" data-share-post="{{ p['id'] }}" title="Copy post link" aria-label="Copy post link">↗</button>
           <span class="spacer"></span><button class="icon-action {{ 'saved' if p['saved'] else '' }}" data-post-save="{{ p['id'] }}" title="Save post" aria-label="Save post">{{ '▣' if p['saved'] else '▢' }}</button>
         </div>
-        <div class="post-engagement"><strong>{{ p['likes'] }} likes</strong><span>{{ p['comments_count'] }} comments</span></div>
-        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }}</div>
+        <div class="post-engagement"><strong class="bf-likes-count">{{ p['likes'] }} likes</strong><span class="bf-comments-count">{{ p['comments_count'] }} comments</span><span>⟳ {{ p['repost_count'] }} reposts</span></div>
+        <div class="post-copy"><strong>{{ p['display_name'] }}</strong> {{ p['body'] }} {% if p['edited_at'] %}<small>(edited)</small>{% endif %}</div>
+        {% if p['original_author_id'] %}
+          <a class="bf-repost-source" href="{{ url_for('app.person_page',person_id=p['original_author_id']) if p['original_author_type']=='pessoa' else url_for('app.organization_page',organization_id=p['original_author_id']) }}"><span>⟳ Reposted from <strong>{{ p['original_author_name'] }}</strong></span><p>{{ p['original_body']|truncate(240,True,'…') }}</p><small>Original creator credited · Open profile ↗</small></a>
+        {% endif %}
         {% if p['topic_tags'] %}<div class="post-topics">{% for tag in p['topic_tags'] %}<span>#{{ tag }}</span>{% endfor %}</div>{% endif %}
         {% if p['request_id'] and p['request_status']=='open' %}
           {% set linked=needs|selectattr('id','equalto',p['request_id'])|first %}
@@ -469,11 +574,20 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
             <a href="{{ url_for('app.app_page',tab='explore',open_request=p['request_id']) }}" class="btn small">Help now ♡</a></div>
         {% elif p['type']=='ong' %}<a class="post-project-link" href="{{ url_for('app.organization_page',organization_id=p['author_user_id']) }}">♡ Explore this nonprofit's projects →</a>{% endif %}
         <div class="why-post">✧ {{ p['why_recommended'] }} <span>· Based on interests, follows & confirmed giving</span></div>
-        {% for cm in comments if cm['post_id']==p['id'] %}{% if loop.index<=2 %}<div class="post-comment"><strong>{{ cm['display_name'] }}</strong> {{ cm['body'] }}</div>{% endif %}{% endfor %}
-        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
+        <details class="bf-comments-details" open><summary>Comments · {{ p['comments_count'] }}</summary><div class="bf-comments-list">
+        {% for cm in comments if cm['post_id']==p['id'] %}
+        <div class="post-comment"><strong>{{ cm['display_name'] }}</strong><span>{{ cm['body'] }}</span>{% if cm['edited_at'] %}<small>(edited)</small>{% endif %}
+          {% if cm['user_id']==user['id'] or p['author_user_id']==user['id'] %}
+          <details class="bf-comment-controls"><summary>Options</summary>
+           {% if cm['user_id']==user['id'] %}<form action="{{ url_for('app.edit_comment',comment_id=cm['id']) }}" method="POST" class="bf-edit-comment"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input name="body" maxlength="500" required value="{{ cm['body'] }}"><button type="submit">Save</button></form>{% endif %}
+           <form action="{{ url_for('app.delete_comment',comment_id=cm['id']) }}" method="POST" onsubmit="return confirm('Delete comment?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="bf-danger-text">Delete comment</button></form>
+          </details>{% endif %}
+        </div>{% endfor %}</div></details>
+        <form method="POST" action="{{ url_for('app.comment_post',post_id=p['id']) }}" class="social-comment-form bf-ajax-comment" id="reply-{{ p['id'] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="text" name="body" maxlength="500" required placeholder="Add a supportive comment…" aria-label="Comment"><button type="submit">Post</button></form>
       </div>
     </article>
     {% endfor %}
+    {% if has_more_feed|default(false) and feed_page|default(1)<4 %}<a class="bf-older-posts btn outline" href="{{ url_for('app.app_page',tab=tab,feed=feed_mode,page=feed_page+1) }}">See more posts · including previous updates ↓</a>{% endif %}
     {% else %}
     <div class="social-empty"><span>✦</span><h3>No stories here yet</h3><p>Explore new nonprofits or switch to For you to discover fresh causes.</p><a href="{{ url_for('app.app_page',tab=tab,feed='for-you') }}" class="btn">Explore stories</a></div>
     {% endif %}
@@ -520,29 +634,61 @@ html.bf-is-leaving .content{opacity:.65;transform:translateY(6px);transition:opa
 {% elif tab=='impact' %}
 <div class="section-head"><div><span class="eyebrow">The impact you make</span><h1>Every act matters.</h1><p>Confirmed donations build your impact. Demo contributions never affect XP or rank.</p></div><a class="btn" href="{{ url_for('app.app_page',tab='rewards') }}">My rewards ✦</a></div><section class="grid grid3 section"><div class="card stat"><span class="icon">✦</span><strong>Level {{ user['level'] }}</strong><small>Community impact level</small></div><div class="card stat"><span class="icon">♡</span><strong>{{ user['amount'] }}</strong><small>Verified donations credited</small></div><div class="card stat"><span class="icon">✧</span><strong>{{ xp }} XP</strong><small>Impact experience earned</small></div></section><section class="section"><h2>Contribution history</h2><div class="stack" style="margin-top:14px">{% for d in my_donations %}<div class="card card-pad flex between wrap"><div><strong>{{ d['item_title'] or 'Donation to nonprofit' }}</strong><div><small>To {{ d['ngo_name'] }} · {{ d['quantity'] }} units</small></div></div><span class="badge {{ 'green' if d['status']=='confirmed' else '' }}">{{ d['status']|capitalize }}</span></div>{% else %}<div class="empty">Your history will appear after you support a request.</div>{% endfor %}</div></section><section class="section"><h2>Achievement badges</h2><div class="grid grid3" style="margin-top:14px">{% for b in badges %}<div class="card card-pad"><span style="font-size:31px">{{ '🏅' if b['earned'] else '🔒' }}</span><h3>{{ b['name'] }}</h3><p>{{ 'Achieved' if b['earned'] else 'Not unlocked yet' }}</p></div>{% endfor %}</div></section>
 {% elif tab=='messages' %}
-<div class="section-head"><div><span class="eyebrow">GIVING IS A CONVERSATION</span><h1>Your messages.</h1><p>Connect with nonprofits and business partners. Coordinate drop-offs and donations.</p></div></div>
-<div class="chat-layout section">
-  <aside class="chat-roster"><h2>Conversations</h2>
+<div class="section-head bf-message-heading"><div><span class="eyebrow">CONNECTIONS MAKE CHANGE POSSIBLE</span><h1>Messages & conversations.</h1><p>Chat with people, nonprofits and businesses. Share photos, forward messages and coordinate real help.</p></div><button class="btn" type="button" data-open="newMessageDialog">＋ New message</button></div>
+<div class="bf-msg-tabs"><a href="{{ url_for('app.app_page',tab='messages') }}" class="badge green">✉ All conversations</a><a href="{{ url_for('app.app_page',tab='organizations') }}" class="badge">◈ Explore organizations</a><a href="{{ url_for('app.app_page',tab='people') }}" class="badge">☺ Find people</a><span class="badge">{{ unread_total }} unread</span></div>
+<div class="chat-layout section bf-chat-layout">
+  <aside class="chat-roster">
+    <div class="bf-chat-sidebar-top"><div class="flex between"><h2>Inbox</h2><button class="bf-round-btn" type="button" data-open="newMessageDialog" aria-label="Start new conversation">＋</button></div>
+    <input id="bfChatSearch" class="search" type="search" aria-label="Search contacts" placeholder="Search people, NGOs, companies…"></div>
+    <div id="bfContactList">
     {% for peer in thread_peers %}
-    <a class="chat-contact {{ 'active' if selected_peer==peer['id'] else '' }}" href="{{ url_for('app.app_page',tab='messages',peer=peer['id']) }}">
-      <span class="creator-avatar">{{ peer['display_name'][:1]|upper }}</span><div><strong>{{ peer['display_name'] }}</strong><small>{{ peer['latest'] or ('Nonprofit' if peer['type']=='ong' else 'Business' if peer['type']=='empresa' else 'Supporter') }}</small></div>
+    <a class="chat-contact {{ 'active' if selected_peer==peer['id'] else '' }}" data-contact-name="{{ peer['display_name']|lower|e }}" href="{{ url_for('app.app_page',tab='messages',peer=peer['id']) }}">
+      <span class="creator-avatar">{{ peer['display_name'][:1]|upper }}</span>
+      <div class="bf-chat-contact-body"><strong>{{ peer['display_name'] }}</strong><small>{{ 'NGO' if peer['type']=='ong' else 'Business' if peer['type']=='empresa' else 'Member' }} · {{ peer['latest'][:16] if peer['latest'] else 'Say hello' }}</small></div>
+      {% if peer['unread'] and selected_peer!=peer['id'] %}<span class="bf-unread">{{ peer['unread'] }}</span>{% endif %}
     </a>
-    {% else %}<p style="padding:15px">No contacts available yet.</p>{% endfor %}
+    {% else %}<p style="padding:15px">No contacts yet. Find someone in the community.</p>{% endfor %}
+    </div>
   </aside>
   <section class="chat-conversation">
     {% if selected_peer %}
       {% set recipient=thread_peers|selectattr('id','equalto',selected_peer)|first %}
-      <div class="chat-head"><span class="creator-avatar">{{ recipient['display_name'][:1]|upper }}</span><div><strong>{{ recipient['display_name'] }}</strong><small>Coordinate your community impact</small></div></div>
+      <div class="chat-head bf-chat-head"><span class="creator-avatar">{{ recipient['display_name'][:1]|upper }}</span>
+        <div class="bf-chat-title"><strong>{{ recipient['display_name'] }}</strong><small>{{ 'Nonprofit' if recipient['type']=='ong' else 'Business' if recipient['type']=='empresa' else 'Community member' }} · Private conversation</small></div>
+        {% if recipient['type']!='pessoa' or recipient['peer_public_profile'] %}<a class="bf-round-btn" title="View profile" aria-label="View profile" href="{{ url_for('app.person_page',person_id=selected_peer) if recipient['type']=='pessoa' else url_for('app.organization_page',organization_id=selected_peer) }}">☺</a>{% endif %}
+        <form method="POST" action="{{ url_for('app.block_message_contact',recipient_id=selected_peer) }}" onsubmit="return confirm('Change the blocking status of this contact?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="bf-round-btn" type="submit" title="{{ 'Unblock' if recipient['blocked_by_me'] else 'Block' }} this user" aria-label="Block or unblock contact">{{ '✓' if recipient['blocked_by_me'] else '⊘' }}</button></form>
+      </div>
       <div class="chat-bubbles" id="chatBubbles">
         {% for m in conversation %}
-          <div class="chat-row {{ 'mine' if m['sender_user_id']==user['id'] else '' }}"><div class="chat-bubble">{{ m['body'] }}</div><small>{{ m['created'][:16] }}</small></div>
-        {% else %}<p class="chat-intro">Say hello! Introduce yourself and explain how you'd like to help.</p>{% endfor %}
+          <div class="chat-row {{ 'mine' if m['sender_user_id']==user['id'] else '' }}"><div class="chat-bubble">
+            {% if m['deleted_at'] %}<div class="bf-deleted-message">⊘ This message was deleted</div>
+            {% else %}
+            {% if m['forwarded_from_id'] %}<div class="bf-forward-label">↪ Forwarded message</div>{% endif %}
+            {% if m['body'] %}<div class="bf-message-text">{{ m['body'] }}</div>{% endif %}
+            {% if m['has_image'] %}<a class="bf-chat-picture" href="{{ url_for('app.message_image',message_id=m['id']) }}" target="_blank" rel="noopener"><img loading="lazy" src="{{ url_for('app.message_image',message_id=m['id']) }}" alt="Private photo shared in this conversation"></a>{% endif %}
+            {% if m['shared_post_id'] and m['shared_post_visible'] %}<a class="bf-chat-shared" href="{{ url_for('app.view_post',post_id=m['shared_post_id']) }}">✦ Community story <small>{{ m['shared_post_body']|default('Open shared post',true)|truncate(95,True,'…') }}</small><strong>View original post ↗</strong></a>{% endif %}
+            {% endif %}
+            </div>
+            <div class="bf-message-foot"><time>{{ m['created'][:16] }}</time>{% if m['edited_at'] and not m['deleted_at'] %}<small>edited</small>{% endif %}{% if m['sender_user_id']==user['id'] %}<span title="{{ 'Read' if m['read_at'] else 'Sent' }}">{{ '✓✓' if m['read_at'] else '✓' }}</span>{% endif %}
+            {% if not m['deleted_at'] %}<button type="button" class="bf-forward-btn" data-forward-message="{{ url_for('app.forward_message',message_id=m['id']) }}" title="Forward privately">↪ Forward</button>{% endif %}
+            <details class="bf-msg-options"><summary aria-label="Message options">•••</summary><div class="bf-msg-dropdown">
+              {% if m['sender_user_id']==user['id'] and not m['deleted_at'] %}<button type="button" data-edit-message="{{ m['id'] }}" data-message-url="{{ url_for('app.edit_message',message_id=m['id']) }}">Edit</button>{% endif %}
+              <form method="POST" action="{{ url_for('app.delete_message',message_id=m['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="scope" value="me"><button type="submit">Delete for me</button></form>
+              {% if m['sender_user_id']==user['id'] and not m['deleted_at'] %}<form method="POST" action="{{ url_for('app.delete_message',message_id=m['id']) }}" onsubmit="return confirm('Delete for both participants?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="scope" value="everyone"><button type="submit" class="bf-danger-text">Delete for everyone</button></form>{% endif %}
+            </div></details>
+            </div>
+          </div>
+        {% else %}<div class="bf-chat-intro"><span>♡</span><h3>Start a meaningful conversation</h3><p>Introduce yourself, ask a question or plan your next donation.</p></div>{% endfor %}
       </div>
-      <form class="chat-compose" method="POST" action="{{ url_for('app.send_message') }}">
+      {% if recipient['blocked_by_me'] %}<div class="bf-chat-blocked">You blocked this account. Unblock it to send a message.</div>{% else %}
+      <form class="chat-compose bf-chat-compose" method="POST" enctype="multipart/form-data" action="{{ url_for('app.send_message') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="recipient_id" value="{{ selected_peer }}">
-        <textarea name="body" rows="1" maxlength="1000" required placeholder="Write a message…"></textarea><button type="submit" class="btn">Send ➤</button>
-      </form>
-    {% else %}<div class="social-empty"><h3>Start a conversation</h3><p>Follow a nonprofit to connect about its needs.</p></div>{% endif %}
+        <label class="bf-attach" title="Add a photo">📷<input type="file" name="photo" accept="image/png,image/jpeg,image/webp" hidden></label>
+        <textarea name="body" rows="1" maxlength="1000" placeholder="Write something kind…"></textarea>
+        <button type="submit" class="btn">Send ➤</button>
+        <small class="bf-attachment-label" aria-live="polite"></small>
+      </form>{% endif %}
+    {% else %}<div class="bf-chat-intro"><span>✉</span><h3>Start a conversation</h3><p>Find a member, nonprofit or business to connect with.</p><button class="btn" type="button" data-open="newMessageDialog">New message</button></div>{% endif %}
   </section>
 </div>
 {% elif tab=='profile' %}
@@ -579,7 +725,7 @@ $('#useLocation')?.addEventListener('click',()=>{if(!navigator.geolocation){toas
 })();
 </script><nav class="mobile-dock" aria-label="Mobile navigation">
   {% for slug,icon,label in [('home','⌂','Feed'),('explore','♡','Needs'),('organizations','◈','NGOs'),('messages','✉','Chat'),('profile','☺','Profile')] %}
-    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}</a>
+    <a href="{{ url_for('app.app_page',tab=slug) }}" class="{{ 'active' if tab==slug else '' }}"><span>{{ icon }}</span>{{ label }}{% if slug=='messages' and unread_total|default(0) %}<small class="bf-nav-count">{{ unread_total }}</small>{% endif %}</a>
   {% endfor %}
 </nav>
 <script>
@@ -626,17 +772,24 @@ $('#useLocation')?.addEventListener('click',()=>{if(!navigator.geolocation){toas
    document.querySelector('#reply-'+el.dataset.focusComment+' input[name="body"]')?.focus();
  }));
  document.querySelectorAll('[data-share-post]').forEach(el=>el.addEventListener('click',async()=>{
-   const target=location.origin+'/app/?tab=community#post-'+el.dataset.sharePost;
+   const target=location.origin+'/app/posts/'+el.dataset.sharePost;
    try{await navigator.clipboard.writeText(target);el.textContent='✓';setTimeout(()=>el.textContent='↗',2000)}
    catch{window.prompt('Copy post URL:',target)}
  }));
  document.querySelectorAll('.photo-upload input').forEach(el=>el.addEventListener('change',()=>{
    const name=el.closest('.social-compose')?.querySelector('.compose-photo-name');
-   if(name)name.textContent=el.files?.[0]?.name||'';
+   if(name)name.textContent=el.files?.length ? el.files.length+' photo(s) ready' : '';
  }));
  const chat=document.getElementById('chatBubbles');if(chat)chat.scrollTop=chat.scrollHeight;
 })();
 </script>
+<dialog class="modal bf-v7-dialog" id="bfEditPostDialog"><div class="modal-head"><h2>Edit publication</h2><button type="button" class="x" data-close>×</button></div>
+ <form id="bfEditPostForm" class="modal-body stack" method="POST" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="field">Caption<textarea name="body" maxlength="1200" rows="4"></textarea></label><label class="field">Tags<input name="tags" maxlength="200"></label><label class="field">Visibility<select name="duration"><option value="keep">Keep current visibility</option><option value="permanent">Permanent</option><option value="12h">12 hours from now</option><option value="24h">24 hours from now</option><option value="3d">3 days from now</option><option value="7d">7 days from now</option><option value="30d">30 days from now</option></select></label><label class="field">Add photos (up to 5 total)<input type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp"></label><label class="check"><input type="checkbox" name="remove_photos"> Remove existing photos</label><button type="submit" class="btn">Save changes</button></form></dialog>
+<dialog class="modal bf-v7-dialog" id="bfEditMessageDialog"><div class="modal-head"><h2>Edit message</h2><button type="button" class="x" data-close>×</button></div><form id="bfEditMessageForm" method="POST" class="modal-body stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><textarea name="body" maxlength="1000" rows="4" required></textarea><button type="submit" class="btn">Save edited message</button></form></dialog>
+{% if story_id|default(none) %}{% for st in story_posts|default([]) if st['id']==story_id %}
+<dialog class="bf-story-viewer" id="bfStoryViewer"><div class="bf-story-content"><div class="bf-story-viewer-head"><strong>{{ st['display_name'] }}</strong><small>Expires {{ st['expires_at'][:16] }} UTC</small><button class="x" type="button" data-close>×</button></div>
+{% if st['has_multi'] or st['has_legacy'] %}<img class="bf-story-viewer-photo" src="{{ url_for('app.post_gallery_image',post_id=st['id'],position=0) }}" alt="Temporary story image">{% endif %}<p>{{ st['body'] }}</p>{% if st['author_user_id']==user['id'] %}<form method="POST" action="{{ url_for('app.delete_post',post_id=st['id']) }}" onsubmit="return confirm('Delete this story?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn outline small" type="submit">Delete my story</button></form>{% endif %}</div></dialog>
+{% endfor %}{% endif %}
 <div id="bf-nav-loading" role="status" aria-live="polite" aria-label="Loading page" hidden>
   <div class="bf-load-card">
     <span class="bf-load-mark" aria-hidden="true">✦</span>
@@ -651,15 +804,16 @@ $('#useLocation')?.addEventListener('click',()=>{if(!navigator.geolocation){toas
 (() => {
   'use strict';
   const overlay = document.getElementById('bf-nav-loading');
-  let navigating = false;
+  let navigating = false, showTimer;
   const showLoading = () => {
     if(!overlay || navigating) return;
     navigating = true;
-    overlay.hidden = false;
-    overlay.setAttribute('aria-hidden','false');
-    document.documentElement.classList.add('bf-is-leaving');
+    clearTimeout(showTimer);
+    // Ordinary fast navigation should not flash a loading screen.
+    showTimer = setTimeout(() => {overlay.hidden=false;overlay.setAttribute('aria-hidden','false');}, 350);
   };
   const resetLoading = () => {
+    clearTimeout(showTimer);
     navigating = false;
     if(overlay){overlay.hidden = true;overlay.setAttribute('aria-hidden','true');}
     document.documentElement.classList.remove('bf-is-leaving');
@@ -695,6 +849,122 @@ $('#useLocation')?.addEventListener('click',()=>{if(!navigator.geolocation){toas
       img.addEventListener('error',done,{once:true});
     });
   }
+})();
+</script>
+
+{% if public_org is not defined or not public_org %}{% if public_person is not defined or not public_person %}
+<dialog class="modal bf-social-dialog" id="newMessageDialog"><div class="modal-head"><div><span class="eyebrow">NEW CONVERSATION</span><h2>Connect with the community</h2></div><button type="button" class="x" data-close>×</button></div><form class="modal-body stack" action="{{ url_for('app.send_message') }}" method="POST" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Send to an individual, nonprofit or business</label><select name="recipient_id" required><option value="">Choose a person or organization</option>{% for c in creators if c['id']!=user['id'] %}<option value="{{ c['id'] }}">{{ 'NGO' if c['type']=='ong' else 'Business' if c['type']=='empresa' else 'Person' }} · {{ c['display_name'] }}</option>{% endfor %}</select></div><div class="field"><label>Your message</label><textarea name="body" maxlength="1000" required placeholder="Hi! I'd love to connect about your work…"></textarea></div><div class="field"><label>Add a private photo (optional)</label><input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></div><button class="btn" type="submit">Start conversation ↗</button></form></dialog>
+<dialog class="modal bf-social-dialog" id="repostDialog"><div class="modal-head"><div><span class="eyebrow">AMPLIFY A CAUSE</span><h2>Repost a community story</h2></div><button type="button" class="x" data-close>×</button></div><form id="bfRepostForm" class="modal-body stack" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="bf-credit-note">⟳ Original creator: <strong id="bfRepostAuthor"></strong><p>The original photo, tags and donation request will remain linked to the source.</p></div><div class="field"><label>Add your thoughts (optional)</label><textarea name="body" maxlength="650" placeholder="Why this story matters to me…"></textarea></div><button type="submit" class="btn full">Repost with credit ⟳</button></form></dialog>
+<dialog class="modal bf-social-dialog" id="sendPostDialog"><div class="modal-head"><div><span class="eyebrow">SHARE IN PRIVATE</span><h2>Send this post to someone</h2></div><button type="button" class="x" data-close>×</button></div><form id="bfSendPostForm" class="modal-body stack" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="field"><label>Recipient</label><select name="recipient_id" required><option value="">Choose a recipient</option>{% for c in creators if c['id']!=user['id'] %}<option value="{{ c['id'] }}">{{ 'NGO' if c['type']=='ong' else 'Business' if c['type']=='empresa' else 'Person' }} · {{ c['display_name'] }}</option>{% endfor %}</select></div><div class="field"><label>A note (optional)</label><textarea name="body" maxlength="500" placeholder="Thought you might like this cause…"></textarea></div><button type="submit" class="btn full">Send privately ✉</button></form></dialog>
+{% if tab=='messages' %}<dialog class="modal bf-social-dialog" id="forwardMessageDialog"><div class="modal-head"><div><span class="eyebrow">PRIVATE FORWARD</span><h2>Forward this message</h2></div><button type="button" class="x" data-close>×</button></div><form id="bfForwardForm" class="modal-body stack" method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><p>Only forward messages you have permission to share. The recipient will see a forwarded label.</p><div class="field"><label>Forward to</label><select name="recipient_id" required><option value="">Choose a contact</option>{% for c in creators if c['id']!=user['id'] %}<option value="{{ c['id'] }}">{{ c['display_name'] }}</option>{% endfor %}</select></div><button type="submit" class="btn">Forward message ↪</button></form></dialog>{% endif %}
+{% endif %}{% endif %}
+<style>
+/* Byfrost Social V6: role-neutral messenger and credited reposts. */
+.bf-nav-count{background:#7c5beb;color:#fff!important;border-radius:20px;min-width:22px;height:22px;display:grid;place-items:center;margin-left:auto;font-size:10px}
+.bf-msg-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.bf-message-heading{align-items:center}
+.bf-chat-layout{height:min(78vh,785px);min-height:550px}.bf-chat-sidebar-top{padding:16px 15px;border-bottom:1px solid #ece9f3;background:#fff;position:sticky;top:0;z-index:3}.bf-chat-sidebar-top h2{padding:0;font-size:19px}.bf-chat-sidebar-top .search{margin-top:12px;padding:9px 12px;font-size:12px}.bf-round-btn{width:34px;height:34px;border:1px solid #ece7f8;background:#f8f5ff;border-radius:11px;display:grid;place-items:center;color:#7156c3;font-size:18px}.bf-round-btn:hover{background:#efe9ff}.bf-chat-contact-body{min-width:0;flex:1}.bf-chat-contact-body strong,.bf-chat-contact-body small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bf-unread{display:grid;place-items:center;min-width:24px;height:24px;padding:4px 6px;background:#7b5ce9;border-radius:99px;color:white;font-size:10px;font-weight:800}.bf-chat-title{min-width:0;flex:1}.bf-chat-title strong{display:block}.bf-chat-title small{display:block}.bf-chat-head{gap:9px}.bf-chat-head form{margin:0}.bf-message-text{white-space:pre-wrap;overflow-wrap:anywhere}.bf-chat-picture{display:block;margin-top:8px}.bf-chat-picture img{display:block;max-width:290px;width:100%;border-radius:12px;max-height:310px;object-fit:cover}.bf-message-foot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:#9089a4;font-size:10px}.bf-message-foot time{font-size:10px}.bf-forward-btn{font-size:10px;background:none;border:none;color:#8564d8;padding:3px 5px}.bf-forward-btn:hover{text-decoration:underline}.bf-forward-label{font-size:10px;color:#8163bd;font-weight:850;margin-bottom:6px}.bf-chat-shared{display:grid;gap:4px;margin-top:8px;padding:12px;background:#f8f5ff;border:1px solid #e6dff9;border-radius:12px;color:#6852b4;font-weight:800}.bf-chat-shared small{color:#656175;white-space:normal;line-height:1.4}.bf-chat-shared strong{font-size:11px}.bf-chat-intro{display:grid;place-items:center;align-content:center;gap:13px;padding:30px;min-height:280px;text-align:center;max-width:430px;margin:auto}.bf-chat-intro>span{font-size:48px;color:#957ef2}.bf-chat-intro p{max-width:300px}.bf-attach{cursor:pointer;font-size:23px;display:grid;place-items:center}.bf-chat-compose{position:relative;align-items:center}.bf-attachment-label{position:absolute;bottom:1px;left:52px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}.bf-chat-blocked{padding:16px;text-align:center;background:#fff4f2;color:#9c615d}.bf-repost-source{display:block;border:1px solid #e8e2f7;border-left:4px solid #a58cf3;background:#faf8ff;border-radius:13px;padding:13px 15px;margin:10px 0}.bf-repost-source>span{display:block;font-size:12px;color:#6f55b5}.bf-repost-source p{font-size:12px;color:#4f4a67;margin:7px 0}.bf-repost-source small{font-size:10px;color:#9b91b7}.bf-repost-source:hover{border-color:#bea9ef}.bf-credit-note{padding:14px;border-radius:14px;background:#f1edff;color:#6650b1}.bf-credit-note p{font-size:12px;margin-top:6px}.bf-social-dialog{max-width:min(480px,calc(100vw - 24px))}.bf-social-dialog .modal-body{padding:22px}.bf-social-dialog .field select{min-width:0;max-width:100%}.bf-social-dialog textarea{min-height:90px}.bf-msg-tabs .badge{font-size:11px}
+@media(max-width:860px){.bf-chat-layout{height:calc(100dvh - 260px);min-height:500px}.bf-message-heading{flex-wrap:wrap}}
+@media(max-width:620px){.bf-chat-layout{grid-template-columns:112px minmax(0,1fr);height:calc(100dvh - 270px);min-height:460px}.bf-chat-sidebar-top{padding:9px 5px}.bf-chat-sidebar-top h2{font-size:13px}.bf-chat-sidebar-top .search{font-size:10px;padding:8px 4px}.chat-contact{padding:9px 5px;gap:3px}.chat-contact .creator-avatar{width:34px;height:34px}.bf-chat-contact-body{width:100%;text-align:center}.bf-chat-contact-body strong{font-size:10px}.bf-chat-head{padding:9px 8px}.bf-chat-head .creator-avatar{display:none}.bf-chat-title strong{font-size:12px}.bf-chat-title small{font-size:9px}.bf-round-btn{height:28px;width:28px;font-size:14px;flex-shrink:0}.bf-message-heading h1{font-size:26px}.bf-chat-compose{gap:5px}.bf-chat-compose textarea{font-size:12px;min-height:42px}.bf-chat-compose .btn{padding:7px;font-size:10px}.bf-chat-picture img{max-width:100%}.bf-message-foot{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.bf-chat-layout,.bf-repost-source{transition:none!important}}
+</style>
+<script>
+(() => {
+  const byId=id=>document.getElementById(id);
+  const search=byId('bfChatSearch');
+  search?.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();document.querySelectorAll('[data-contact-name]').forEach(el=>{el.hidden=!el.dataset.contactName.includes(q)})});
+  document.querySelectorAll('[data-repost-url]').forEach(btn=>btn.addEventListener('click',()=>{
+    const modal=byId('repostDialog'),form=byId('bfRepostForm');if(!modal||!form)return;
+    form.action=btn.dataset.repostUrl;byId('bfRepostAuthor').textContent=btn.dataset.postName||'Community creator';modal.showModal();
+  }));
+  document.querySelectorAll('[data-send-post-url]').forEach(btn=>btn.addEventListener('click',()=>{
+    const modal=byId('sendPostDialog'),form=byId('bfSendPostForm');if(!modal||!form)return;
+    form.action=btn.dataset.sendPostUrl;modal.showModal();
+  }));
+  document.querySelectorAll('[data-forward-message]').forEach(btn=>btn.addEventListener('click',()=>{
+    const modal=byId('forwardMessageDialog'),form=byId('bfForwardForm');if(!modal||!form)return;
+    form.action=btn.dataset.forwardMessage;modal.showModal();
+  }));
+  // These dialogs are declared after the earlier app script, so bind their controls here.
+  document.querySelectorAll('.bf-social-dialog [data-close]').forEach(btn=>btn.addEventListener('click',()=>btn.closest('dialog')?.close()));
+  document.querySelectorAll('.bf-social-dialog').forEach(dialog=>dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()}));
+  document.querySelectorAll('.bf-chat-compose input[type=file]').forEach(input=>input.addEventListener('change',()=>{
+    const label=input.closest('form')?.querySelector('.bf-attachment-label');if(label)label.textContent=input.files?.[0]?.name||'';
+  }));
+})();
+</script>
+
+<script>
+/* Byfrost V7 progressive UI: interactions remain server-authoritative. */
+(()=>{'use strict';
+const csrf=document.querySelector('meta[name="csrf-token"]')?.content||'';
+const $=(q,scope=document)=>scope.querySelector(q), $$=(q,scope=document)=>[...scope.querySelectorAll(q)];
+function showDialog(id){const el=document.getElementById(id);if(el&&!el.open)el.showModal()}
+$$('.bf-v7-dialog [data-close], .bf-story-viewer [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog')?.close()));
+$$('[data-gallery-move]').forEach(b=>b.addEventListener('click',()=>{
+ const g=b.closest('[data-gallery]'),slides=$$('.bf-gallery-slide',g);
+ if(!slides.length)return;let index=slides.findIndex(x=>!x.hidden);slides[index].hidden=true;
+ index=(index+Number(b.dataset.galleryMove)+slides.length)%slides.length;slides[index].hidden=false;
+ const count=$('.bf-gallery-count',g);if(count)count.textContent=(index+1)+' / '+slides.length;
+}));
+$$('.bf-type-select').forEach(el=>el.addEventListener('change',()=>{
+ const form=el.closest('form'),duration=$('.bf-duration-select',form);
+ if(!duration)return;duration.value=el.value==='story'?'24h':'permanent';
+ const perm=duration.querySelector('option[value="permanent"]');if(perm)perm.disabled=el.value==='story';
+}));
+$$('[data-edit-post]').forEach(b=>b.addEventListener('click',()=>{
+ const post=b.closest('.social-post'),form=$('#bfEditPostForm');if(!form)return;
+ form.action='/app/social/posts/'+encodeURIComponent(b.dataset.editPost)+'/edit';
+ $('[name=body]',form).value=$('.bf-original-caption',post)?.value||'';
+ $('[name=tags]',form).value=$('.bf-original-tags',post)?.value||'';
+ showDialog('bfEditPostDialog');
+}));
+$$('[data-edit-message]').forEach(b=>b.addEventListener('click',()=>{
+ const form=$('#bfEditMessageForm'),row=b.closest('.chat-row');if(!form)return;
+ form.action=b.dataset.messageUrl;$('[name=body]',form).value=$('.bf-message-text',row)?.textContent?.trim()||'';
+ showDialog('bfEditMessageDialog');
+}));
+$$('[data-profile-filter]').forEach(b=>b.addEventListener('click',()=>{
+ const container=b.closest('.bf-profile-timeline'),filter=b.dataset.profileFilter;
+ $$('[data-profile-filter]',container).forEach(x=>x.classList.toggle('active',x===b));
+ $$('.bf-profile-post',container).forEach(x=>x.hidden=filter!=='all'&&x.dataset.kind!==filter);
+}));
+// Default profile tab: authored posts. Shared posts remain one click away.
+$$('.bf-profile-timeline').forEach(container=>{
+ $$('.bf-profile-post',container).forEach(x=>x.hidden=x.dataset.kind!=='original');
+});
+const story=$('#bfStoryViewer');if(story)requestAnimationFrame(()=>story.showModal());
+// Like immediately: animate multiple floating hearts, then reconcile API result.
+$$('.bf-like-form').forEach(form=>form.addEventListener('submit',async e=>{
+ e.preventDefault();const btn=$('button',form);if(btn.disabled)return;
+ const post=btn.closest('.social-post');const had=btn.classList.contains('liked');
+ btn.classList.toggle('liked',!had);btn.textContent=had?'♡':'♥';
+ if(!had){const r=btn.getBoundingClientRect();for(let i=0;i<4;i++){
+  const heart=document.createElement('span');heart.className='bf-heart-pop';heart.textContent='♥';
+  heart.style.left=(r.left+Math.random()*35)+'px';heart.style.top=(r.top-4)+'px';
+  heart.style.animationDelay=(i*70)+'ms';document.body.append(heart);setTimeout(()=>heart.remove(),1400);
+ }}
+ const count=$('.bf-likes-count',post);let n=Number.parseInt(count?.textContent||'0',10)||0;
+ if(count)count.textContent=Math.max(0,n+(had?-1:1))+' likes';btn.disabled=true;
+ try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),credentials:'same-origin',headers:{'Accept':'application/json','X-CSRFToken':csrf}});
+  if(!res.ok)throw Error('Could not save like');const data=await res.json();
+  btn.classList.toggle('liked',data.liked);btn.textContent=data.liked?'♥':'♡';if(count)count.textContent=data.likes+' likes';
+ }catch(err){btn.classList.toggle('liked',had);btn.textContent=had?'♥':'♡';if(count)count.textContent=n+' likes';alert(err.message)}
+ finally{btn.disabled=false}
+}));
+// Comments also update without leaving or loading the feed.
+$$('.bf-ajax-comment').forEach(form=>form.addEventListener('submit',async e=>{
+ e.preventDefault();const input=$('[name=body]',form),body=input.value.trim();if(!body)return;
+ const btn=$('button[type=submit]',form);btn.disabled=true;
+ try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),credentials:'same-origin',headers:{'Accept':'application/json','X-CSRFToken':csrf}});
+  if(!res.ok)throw Error('Could not publish comment');const d=await res.json();
+  const post=form.closest('.social-post'),list=$('.bf-comments-list',post);
+  const comment=document.createElement('div');comment.className='post-comment';
+  const name=document.createElement('strong');name.textContent=d.author_name;const text=document.createElement('span');text.textContent=d.body;
+  comment.append(name,text);if(list)list.prepend(comment);input.value='';
+  const counter=$('.bf-comments-count',post);if(counter){const n=parseInt(counter.textContent,10)||0;counter.textContent=(n+1)+' comments'}
+  const details=$('.bf-comments-details',post);if(details)details.open=true;
+ }catch(err){alert(err.message)}finally{btn.disabled=false}
+}));
 })();
 </script>
 </body></html>
